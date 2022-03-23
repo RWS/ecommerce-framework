@@ -1,14 +1,14 @@
 SDL Web E-Commerce Framework v1.2 
 =========================================
 
-This is a framework to enable E-Commerce functionality for SDL Web.
+This is a framework to enable E-Commerce functionality for Tridion Sites.
 It contains ECL providers and DXA modules for various E-Commerce systems.
 
 Right now it provides connectors for:
 
 * Fredhopper (http://www.fredhopper.com)
-* SAP Hybris (http://www.hybris.com)
-* Salesforce Commerce Cloud (Demandware) (http://www.demandware.com)
+* SAP Hybris (http://www.hybris.com) (deprecated)
+* Salesforce Commerce Cloud (Demandware) (http://www.demandware.com) (deprecated)
 
 The framework has been verified on SDL Web 9.5 and DXA.Net 2.2 and DXA.Java 1.7.
 
