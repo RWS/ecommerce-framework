@@ -1,4 +1,4 @@
-SDL Web E-Commerce Framework v1.2 RC9
+SDL Web E-Commerce Framework v1.2 
 =========================================
 
 This is a framework to enable E-Commerce functionality for SDL Web.
@@ -10,7 +10,7 @@ Right now it provides connectors for:
 * SAP Hybris (http://www.hybris.com)
 * Salesforce Commerce Cloud (Demandware) (http://www.demandware.com)
 
-The framework has been verified on SDL Web 8.5 and DXA 2.0.
+The framework has been verified on SDL Web 9.5 and DXA.Net 2.2 and DXA.Java 1.7.
 
 New functionality in the v1.2 version:
 * Improved support for product variants
