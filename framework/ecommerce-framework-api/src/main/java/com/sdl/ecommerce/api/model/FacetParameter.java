@@ -36,6 +36,7 @@ public class FacetParameter {
     private String name;
     private List<String> values = new ArrayList<>();
     private ParameterType type;
+    private boolean isHidden;
 
     /**
      * Create new facet parameter
@@ -61,6 +62,12 @@ public class FacetParameter {
             this.name = this.name.replace("_val", "");
             this.type = ParameterType.SINGLEVALUE;
             this.values.add(strValue);
+        }
+        else if ( name.endsWith("_hidden") ) {
+            this.name = this.name.replace("_hidden", "");
+            this.type = ParameterType.SINGLEVALUE;
+            this.values.add(strValue);
+            this.isHidden = true;
         }
         else if ( rangeMatcher.matches()) {
             this.type = ParameterType.RANGE;
@@ -132,6 +139,10 @@ public class FacetParameter {
      */
     public ParameterType getType() {
         return type;
+    }
+
+    public boolean isHidden() {
+        return isHidden;
     }
 
     public static FacetParameter fromUrl(String facetUrl) {

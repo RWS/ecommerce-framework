@@ -1,0 +1,9 @@
+﻿@model FallbackArticle
+<article class="rich-text">
+    <h2>@Model.Title</h2>
+    @if (Model.Introduction != null)
+    {
+        <div class="content">@Model.Introduction</div>
+    }
+    <div class="content">@Model.Content</div>
+</article>

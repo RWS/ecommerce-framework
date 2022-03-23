@@ -9,6 +9,14 @@ namespace SDL.DemandWare.Ecl
 {
     class DemandWareMountpoint : Mountpoint
     {
+
+        // TODO: Add support for localizations!!
+
+        public override bool CanSearch(int publicationId)
+        {
+            return true;
+        }
+
         protected override ProductItem CreateProductItem(int publicationId, Category parentCategory, Product product)
         {
             return new DemandWareProductItem(publicationId, parentCategory, product);

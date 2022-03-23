@@ -42,9 +42,11 @@ public class FredhopperQueryResult extends FredhopperResultBase implements Query
 
     @Override
     public List<Product> getProducts() {
-        ItemsSection itemsSection = universe.getItemsSection();
-        if ( itemsSection != null ) {
-            return this.getProducts(itemsSection.getItems().getItem());
+        if (universe != null) {
+            ItemsSection itemsSection = universe.getItemsSection();
+            if (itemsSection != null) {
+                return this.getProducts(itemsSection.getItems().getItem());
+            }
         }
         return new ArrayList<>();
     }
@@ -66,7 +68,7 @@ public class FredhopperQueryResult extends FredhopperResultBase implements Query
 
     @Override
     public int getTotalCount() {
-        if ( this.universe.getItemsSection() != null && this.universe.getItemsSection().getResults() != null ) {
+        if ( this.universe != null && this.universe.getItemsSection() != null && this.universe.getItemsSection().getResults() != null ) {
             return this.universe.getItemsSection().getResults().getTotalItems();
         }
         else {
@@ -76,7 +78,7 @@ public class FredhopperQueryResult extends FredhopperResultBase implements Query
 
     @Override
     public int getCurrentSet() {
-        if ( this.universe.getItemsSection() != null && this.universe.getItemsSection().getResults() != null ) {
+        if ( this.universe != null && this.universe.getItemsSection() != null && this.universe.getItemsSection().getResults() != null ) {
             return this.universe.getItemsSection().getResults().getCurrentSet();
         }
         else {
@@ -86,7 +88,7 @@ public class FredhopperQueryResult extends FredhopperResultBase implements Query
 
     @Override
     public int getStartIndex() {
-        if ( this.universe.getItemsSection() != null && this.universe.getItemsSection().getResults() != null ) {
+        if ( this.universe != null && this.universe.getItemsSection() != null && this.universe.getItemsSection().getResults() != null ) {
             return this.universe.getItemsSection().getResults().getStartIndex();
         }
         else {
@@ -96,7 +98,7 @@ public class FredhopperQueryResult extends FredhopperResultBase implements Query
 
     @Override
     public int getViewSize() {
-        if ( this.universe.getItemsSection() != null  && this.universe.getItemsSection().getResults() != null ) {
+        if ( this.universe != null && this.universe.getItemsSection() != null  && this.universe.getItemsSection().getResults() != null ) {
             return this.universe.getItemsSection().getResults().getViewSize();
         }
         else {
@@ -107,7 +109,7 @@ public class FredhopperQueryResult extends FredhopperResultBase implements Query
     @Override
     public List<QuerySuggestion> getQuerySuggestions() {
         List<QuerySuggestion> querySuggestions =null;
-        if ( this.universe.getQueryAlternatives() != null ) {
+        if ( this.universe != null && this.universe.getQueryAlternatives() != null ) {
             querySuggestions = new ArrayList<>();
             for (com.fredhopper.webservice.client.QuerySuggestion querySuggestion : this.universe.getQueryAlternatives().getQuerySuggestion() ) {
                 querySuggestions.add(new FredhopperQuerySuggestion(querySuggestion));

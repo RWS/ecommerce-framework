@@ -2,31 +2,76 @@
 
 <div class="content" style="margin-bottom: 8px;" @Html.DxaEntityMarkup()>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6" @Html.DxaPropertyMarkup(() => Model.image)>
+            @if (Model.image != null && Model.image.FileSize > 100)
+            {
+                <img class="center-block teaser-img" width="100%" id="product-image" src="@Model.image.Url" />
+            }
             @if (Model.Product.PrimaryImageUrl != null)
             {
+                if (WebRequestContext.IsPreview)
+                {
+                    <!-- Start Component Field: {"XPath":"tcm:Content/custom:ProductDetailWidget/custom:image[1]"} -->
+                }
                 <img class="center-block teaser-img" width="100%" id="product-image" src="@Model.Product.PrimaryImageUrl" />
             }
         </div>
         <div class="col-md-6">
-            <h3 class="product-title">@Model.Product.Name</h3>
+            @if (Model.Title != null)
+            {
+                <h3 class="product-title"  @Html.DxaPropertyMarkup(() => Model.image)>@Model.Title</h3>
+            }
+            else
+            {
+                <h3 class="product-title">
+                    @if (WebRequestContext.IsPreview)
+                    {
+                        <!-- Start Component Field: {"XPath":"tcm:Content/custom:ProductDetailWidget/custom:title[1]"} -->
+                    }
+                    @Model.Product.Name
+                </h3>
+            }
+
+            </h3>
             <div class="product-description">
-                <div>
-                    @Model.Product.Description
-                </div>
+                @if (Model.Description != null)
+                {
+                    <div @Html.DxaPropertyMarkup(() => Model.Description)>
+                        @Model.Description
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        @if (WebRequestContext.IsPreview)
+                        {
+                            <!-- Start Component Field: {"XPath":"tcm:Content/custom:ProductDetailWidget/custom:description[1]"} -->
+                        }
+                        @Model.Product.Description
+                    </div>
+                }
+               
                 
+                <!-- TODO: Make this a bit different? -->
+                <!-- Do an AJAX control here ??? -->
+
                 @if (Model.Product.VariantAttributeTypes != null)
                 {
+                    bool isPrimaryVariant = true;
                     foreach (var variantAttributeType in Model.Product.VariantAttributeTypes)
                     {
                         <h4>@variantAttributeType.Name</h4>
-                         foreach (var valueType in variantAttributeType.Values)
-                         {
+                        foreach (var valueType in variantAttributeType.Values)
+                        {
+                            if (valueType.IsAvailable)
+                            {
                              <a class="btn @(valueType.IsSelected ? "btn-info disabled" : "btn-default")" style="margin-bottom: 4px;" 
-                                href="@ECommerceContext.LinkResolver.GetProductDetailVariantLink(Model.Product, variantAttributeType.Id, valueType.Id)">
+                                href="@LinkResolver.Instance.GetProductDetailVariantLink(Model.Product, variantAttributeType.Id, valueType.Id, isPrimaryVariant)">
                                 @valueType.Value
                              </a>
-                         }
+                            }
+                        }
+                        isPrimaryVariant = false;
                     }
                 }
 
@@ -34,7 +79,7 @@
                     @Model.Product.Price.FormattedPrice
                 </h3>
                 <div class="product-add-to-cart">
-                    <a class="btn btn-primary add-to-cart-button" data-product-id="@Model.Product.Id">
+                    <a class="btn btn-primary add-to-cart-button  @(Model.Product.VariantId == null && Model.Product.MasterId != null ? "disabled" : "")" data-localization-prefix="@ECommerceContext.LocalizePath("/")" data-product-id="@(Model.Product.VariantId != null ? Model.Product.VariantId : Model.Product.Id)">
                         @Html.Resource("e-commerce.addToCartLabel") <i class="fa fa-cart-plus"></i>
                     </a>
                 </div>

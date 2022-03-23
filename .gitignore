@@ -24,3 +24,14 @@ ws-client-*.jar
 IKVM.*.dll
 query-lang-*.dll
 .vs/
+
+dxa.net/ecommerce-framework-dotnet/_ReSharper.Caches/
+*.DotSettings
+dxa.net/Nuget/packages
+
+# NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+*.ncrunch*
+dxa.net/NuGet/output/

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+    <!-- Properties -->
+    <property name="log.pattern" value="%date %-5level %logger{0} - %message%n"/>
+    <property name="log.history" value="7"/>
+    <property name="log.folder" value="log/"/>
+    <property name="log.level" value="INFO"/>
+    <property name="log.encoding" value="UTF-8"/>
+
+    <!-- Appenders -->
+    <appender name="rollingLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.folder}/ecommerce_rest.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>${log.history}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>${log.encoding}</charset>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <prudent>true</prudent>
+    </appender>
+
+    <!-- Loggers -->
+    <logger name="com.sdl" level="${log.level}"/>
+
+    <root level="ERROR">
+        <appender-ref ref="rollingLog"/>
+    </root>
+</configuration>

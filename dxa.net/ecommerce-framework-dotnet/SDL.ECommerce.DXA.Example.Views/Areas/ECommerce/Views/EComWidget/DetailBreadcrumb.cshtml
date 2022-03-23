@@ -12,7 +12,7 @@
             if (breadcrumb.IsCategory == true)
             {
                 <li>
-                    <a href="@ECommerceContext.LinkResolver.GetBreadcrumbLink(breadcrumb)">@breadcrumb.Title</a>
+                    <a href="@LinkResolver.Instance.GetBreadcrumbLink(breadcrumb)">@breadcrumb.Title</a>
                 </li>
             }
         }

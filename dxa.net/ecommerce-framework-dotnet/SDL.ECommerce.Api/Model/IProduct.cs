@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using SDL.ECommerce.Api;
+
 using SDL.ECommerce.Api.Model;
 
 /**
@@ -16,8 +16,14 @@ public interface IProduct
     string Id { get; }
 
     /// <summary>
+    /// Get product master ID. If this product is a variant, this ID can point to the master product.
+    /// </summary>
+    string MasterId { get; }
+
+    /// <summary>
     /// Get product variant ID. If NULL no variant ID is available for current product.
-    /// Variant ID is normally referencing to a concrete product selection with a particular color, size etc.
+    /// Variant ID is normally referencing to a concrete product selection with a particular color, size etc. 
+    /// This is normally the ID to be used when adding products to a cart.
     /// </summary>
     string VariantId { get; }
 
@@ -56,7 +62,7 @@ public interface IProduct
     /// <summary>
     /// Get all additional attributes of the product. Can for example be used in compare views etc.
     /// </summary>
-    IDictionary<string, object> Attributes { get; }
+    IList<IProductAttribute> Attributes { get; }
 
     /// <summary>
     /// Product variants
@@ -66,12 +72,17 @@ public interface IProduct
     /// <summary>
     /// If current product is an variant this list is populated with selected variant attributes
     /// </summary>
-    IList<IProductVariantAttribute> VariantAttributes { get; }
+    IList<IProductAttribute> VariantAttributes { get; }
 
     /// <summary>
     /// Get all available variant attribute types for this product, e.g. color, size. The type also contain all possible values.
     /// </summary>
     IList<IProductVariantAttributeType> VariantAttributeTypes { get; }
+
+    /// <summary>
+    /// Variant link type. Determines how the variant links should be build up (e.g. based on variant attributes or variant ID)
+    /// </summary>
+    VariantLinkType VariantLinkType { get; } 
 
     /// <summary>
     /// Product breadcrumbs

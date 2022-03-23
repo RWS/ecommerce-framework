@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+
+  <!-- Parameters used by tests at runtime using an E-Commerce OData service instance -->
+  <TestRunParameters>
+    <Parameter name="EndpointAddress" value="[OData micro service, e.g. http://localhost:8097/ecommerce.svc]" />
+    <Parameter name="Locale" value="[Locale, e.g. en-US]" />
+  </TestRunParameters>
+
+</RunSettings>

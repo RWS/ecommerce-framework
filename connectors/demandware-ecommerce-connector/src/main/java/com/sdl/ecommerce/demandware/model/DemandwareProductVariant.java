@@ -1,9 +1,10 @@
 package com.sdl.ecommerce.demandware.model;
 
+import com.sdl.ecommerce.api.model.ProductAttribute;
 import com.sdl.ecommerce.api.model.ProductPrice;
 import com.sdl.ecommerce.api.model.ProductVariant;
-import com.sdl.ecommerce.api.model.ProductVariantAttribute;
-import com.sdl.ecommerce.api.model.impl.GenericProductVariantAttribute;
+import com.sdl.ecommerce.api.model.impl.GenericProductAttribute;
+import com.sdl.ecommerce.api.model.impl.GenericProductAttributeValue;
 import com.sdl.ecommerce.demandware.api.model.VariationAttribute;
 import com.sdl.ecommerce.demandware.api.model.VariationAttributeValue;
 
@@ -19,7 +20,7 @@ public class DemandwareProductVariant implements ProductVariant {
 
     private String id;
     private ProductPrice price;
-    private List<ProductVariantAttribute> attributes = new ArrayList<>();
+    private List<ProductAttribute> attributes = new ArrayList<>();
 
 
     public DemandwareProductVariant(com.sdl.ecommerce.demandware.api.model.ProductVariant productVariant, List<VariationAttribute> variationAttributes, String currency) {
@@ -38,7 +39,7 @@ public class DemandwareProductVariant implements ProductVariant {
                     }
                 }
             }
-            attributes.add(new GenericProductVariantAttribute(attributeId, attributeName, valueId, value));
+            attributes.add(new GenericProductAttribute(attributeId, attributeName, new GenericProductAttributeValue(valueId, value)));
         }
         this.price = new DemandwarePrice(productVariant.getPrice(), currency);
     }
@@ -54,7 +55,7 @@ public class DemandwareProductVariant implements ProductVariant {
     }
 
     @Override
-    public List<ProductVariantAttribute> getAttributes() {
+    public List<ProductAttribute> getAttributes() {
         return this.attributes;
     }
 }

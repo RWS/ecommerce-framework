@@ -13,7 +13,7 @@
     int noOfCols = cols * colWidth;
     int colRemainder = 0;
     int navWidth = cols * 230;
-    string categoryUrl = ECommerceContext.LinkResolver.GetNonContextualCategoryLink(Model.CategoryReference.Category);
+    string categoryUrl = LinkResolver.Instance.GetNonContextualCategoryLink(Model.CategoryReference.Category);
 
     if (Model.RelatedPromotions.Count > 0)
     {
@@ -36,7 +36,7 @@
                                         @foreach (var facet in facetGroup.Facets)
                                         {
                                             <li>
-                                                <a href="@ECommerceContext.LinkResolver.GetAbsoluteFacetLink(facet, categoryUrl)">@facet.Title</a>
+                                                <a href="@LinkResolver.Instance.GetAbsoluteFacetLink(facet, categoryUrl)">@facet.Title</a>
                                             </li>
                                         }
                                     </ul>

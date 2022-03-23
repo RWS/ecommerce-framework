@@ -32,5 +32,10 @@ namespace SDL.ECommerce.Api.Model
         ///  Get the category's path name which can based on the name of the category.
         /// </summary>
         string PathName { get; }
+
+        /// <summary>
+        ///  Get the category's sanitized path name which can based on the name of the category.
+        /// </summary>
+        string SanitizedPathName { get; }
     }
 }

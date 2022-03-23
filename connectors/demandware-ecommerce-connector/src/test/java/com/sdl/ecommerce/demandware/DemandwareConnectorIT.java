@@ -43,6 +43,11 @@ public class DemandwareConnectorIT extends GenericTestSuite {
     }
 
     @Test
+    public void testGetCategoryFacets() throws Exception {
+        this.testFacets("/womens");
+    }
+
+    @Test
     public void testSearch() throws Exception {
         this.testSearch("jewel");
     }
@@ -51,7 +56,8 @@ public class DemandwareConnectorIT extends GenericTestSuite {
     public void testSearchWithFacets() throws Exception {
 
         List<FacetParameter> facets = new ArrayList<>();
-        facets.add(new FacetParameter("c_refinementColor", "Blue|Green"));
+        facets.add(new FacetParameter("" +
+                "", "Blue|Green"));
         this.testSearchWithFacets("shirt", facets);
     }
 

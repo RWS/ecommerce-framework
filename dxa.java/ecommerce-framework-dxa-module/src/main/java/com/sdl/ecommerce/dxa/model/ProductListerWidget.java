@@ -2,6 +2,7 @@ package com.sdl.ecommerce.dxa.model;
 
 import com.sdl.ecommerce.api.Query;
 import com.sdl.ecommerce.api.QueryInputContributor;
+import com.sdl.ecommerce.api.model.FacetParameter;
 import com.sdl.ecommerce.api.model.Product;
 import com.sdl.webapp.common.api.mapping.semantic.annotations.SemanticEntity;
 import com.sdl.webapp.common.api.mapping.semantic.annotations.SemanticProperty;
@@ -28,6 +29,9 @@ public class ProductListerWidget extends AbstractEntityModel implements QueryInp
     @SemanticProperty("e:viewType")
     private String viewType;
 
+    @SemanticProperty("e:filterAttributes")
+    private List<ECommerceFilterAttribute> filterAttributes;
+
     // TODO: Add a semantic property
     private Boolean disableRedirect = null;
 
@@ -45,6 +49,13 @@ public class ProductListerWidget extends AbstractEntityModel implements QueryInp
     public void contributeToQuery(Query query) {
         if ( viewSize > 0 ) {
             query.viewSize(viewSize);
+        }
+        if ( filterAttributes != null )
+        {
+            for ( ECommerceFilterAttribute filterAttribute : filterAttributes )
+            {
+                query.facet(new FacetParameter(filterAttribute.getName() + "_hidden", filterAttribute.getValue()));
+            }
         }
         // TODO: How to handle E-Commerce system specific contributions???
         /*
@@ -127,5 +138,13 @@ public class ProductListerWidget extends AbstractEntityModel implements QueryInp
 
     public void setViewSets(int viewSets) {
         this.viewSets = viewSets;
+    }
+
+    public List<ECommerceFilterAttribute> getFilterAttributes() {
+        return filterAttributes;
+    }
+
+    public void setFilterAttributes(List<ECommerceFilterAttribute> filterAttributes) {
+        this.filterAttributes = filterAttributes;
     }
 }

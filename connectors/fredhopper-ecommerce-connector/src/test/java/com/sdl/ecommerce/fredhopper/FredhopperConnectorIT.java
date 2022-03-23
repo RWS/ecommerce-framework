@@ -1,7 +1,10 @@
 package com.sdl.ecommerce.fredhopper;
 
-import com.sdl.ecommerce.api.*;
-import com.sdl.ecommerce.api.model.*;
+import com.sdl.ecommerce.api.QueryFilterAttribute;
+import com.sdl.ecommerce.api.QueryResult;
+import com.sdl.ecommerce.api.ViewType;
+import com.sdl.ecommerce.api.model.Category;
+import com.sdl.ecommerce.api.model.FacetParameter;
 import com.sdl.ecommerce.api.test.GenericTestSuite;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test Fredhopper Services
@@ -116,6 +122,19 @@ public class FredhopperConnectorIT extends GenericTestSuite {
         LOG.info("Testing redirects that are triggered by specific search keywords...");
         QueryResult result = this.queryService.query(this.queryService.newQuery().searchPhrase("contact").viewSize(100));
         LOG.info("Redirect Location: " + result.getRedirectLocation());
+    }
+
+    @Test
+    public void testMultipleCategories() throws Exception {
+        LOG.info("Querying several categories (men OR women)");
+        List<Category> categories = new ArrayList<>();
+        categories.add(this.categoryService.getCategoryByPath("/men"));
+        categories.add(this.categoryService.getCategoryByPath("/women"));
+        QueryResult result = this.queryService.query(
+                this.queryService.newQuery().
+                        categories(categories).
+                        viewSize(10));
+        this.printProducts(result);
     }
 
 }

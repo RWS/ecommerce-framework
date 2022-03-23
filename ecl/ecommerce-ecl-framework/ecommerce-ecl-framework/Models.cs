@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Web;
 
 namespace SDL.ECommerce.Ecl
@@ -9,6 +10,50 @@ namespace SDL.ECommerce.Ecl
         string Title { get; }
         Category Parent { get; }
         IList<Category> Categories { get; }
+
+        Category GetCachedCategory(string categoryId);
+    }
+
+    public class DummyCategory : Category
+    {
+        public DummyCategory(string categoryId)
+        {
+            CategoryId = categoryId;
+        }
+
+        public IList<Category> Categories
+        {
+            get
+            {
+                return new List<Category>();
+            }
+        }
+
+        public string CategoryId
+        {
+            get; internal set;
+        }
+
+        public Category Parent
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        public string Title
+        {
+            get
+            {
+                return "Category Not Found";
+            }
+        }
+
+        public Category GetCachedCategory(string categoryId)
+        {
+            return null;
+        }
     }
 
     public interface Product
@@ -16,6 +61,43 @@ namespace SDL.ECommerce.Ecl
         string Id { get; }
         string Name { get; }
         ProductImage Thumbnail { get; }
+        IList<Category> Categories { get; }
+    }
+
+    public class DummyProduct : Product
+    {
+        public DummyProduct(string id)
+        {
+            Id = id;
+        }
+        public IList<Category> Categories
+        {
+            get
+            {
+                return new List<Category>();
+            }
+        }
+
+        public string Id
+        {
+            get; internal set;
+        }
+
+        public string Name
+        {
+            get
+            {
+                return "Product Not Found";
+            }
+        }
+
+        public ProductImage Thumbnail
+        {
+            get
+            {
+                return null;
+            }
+        }
     }
 
     public interface ProductImage
@@ -49,6 +131,7 @@ namespace SDL.ECommerce.Ecl
     {
         public int Total { get; set; }
         public int NumberOfPages { get; set; }
+        public IList<Category> Categories { get; set; }
         public IList<Product> Products { get; set; }
     }
 

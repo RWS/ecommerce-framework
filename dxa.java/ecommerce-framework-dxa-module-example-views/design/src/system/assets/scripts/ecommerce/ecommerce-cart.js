@@ -2,10 +2,11 @@ $(document).ready(function() {
 
     $(".add-to-cart-button").click(function () {
         var productId = $(this).data("product-id");
+        var localizationPrefix = $(this).data("localization-prefix");
         window.console.log("Adding to cart: " + productId);
 
         $.ajax({
-            url: "/ajax/cart/addProduct/" + productId,
+            url: localizationPrefix + "ajax/cart/addProduct/" + productId,
             dataType: "text",
             success: function (data) {
 
@@ -55,10 +56,11 @@ $(document).ready(function() {
 
     $(".remove-from-cart").click(function() {
         var productId = $(this).data("product-id");
+        var localizationPrefix = $(this).data("localization-prefix");
         window.console.log("Removing from cart: " + productId);
 
         $.ajax({
-            url: "/ajax/cart/removeProduct/" + productId,
+            url: localizationPrefix + "ajax/cart/removeProduct/" + productId,
             dataType: "text",
             success: function (data) {
                 // Reload page to recalculate the cart

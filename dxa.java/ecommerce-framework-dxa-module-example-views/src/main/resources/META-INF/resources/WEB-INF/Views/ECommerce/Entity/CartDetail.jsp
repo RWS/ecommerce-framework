@@ -29,13 +29,13 @@
                             <div class="list-group-item">
                                 <div class="row">
                                     <div class="col-md-1" style="text-align: center;">
-                                        <a href="#" class="remove-from-cart" data-product-id="${item.product.id}"><i class="fa fa-minus-square"></i></a>
+                                        <a href="#" class="remove-from-cart" data-localization-prefix="${localization.localizePath('/')}" data-product-id="${item.product.id}"><i class="fa fa-minus-square"></i></a>
                                     </div>
                                     <div class="col-md-2">
                                         <img src="${item.product.thumbnailUrl}" height="100"/>
                                     </div>
                                     <div class="col-md-5">
-                                        <a href="${linkResolver.getProductDetailLink(item.product)}"><strong>${item.product.name}</strong></a> <br/>
+                                        <a href="${linkResolver.getProductVariantDetailLink(item.product)}"><strong>${item.product.name}</strong></a> <br/>
                                         <c:if test="${item.product.variantAttributes != null }">
                                             <c:forEach var="variantAttribute" items="${item.product.variantAttributes}">
                                                 ${variantAttribute.name}: ${variantAttribute.value}<br/>

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace SDL.ECommerce.DXA.Models
+﻿namespace SDL.ECommerce.DXA.Models
 {
     /// <summary>
     /// Lister Navigation Data
@@ -17,5 +12,6 @@ namespace SDL.ECommerce.DXA.Models
         public string PreviousUrl { get; set; }
         public string FirstUrl { get; set; }
         public string LastUrl { get; set; }
+        public int TotalCount { get; set; }
     }
 }

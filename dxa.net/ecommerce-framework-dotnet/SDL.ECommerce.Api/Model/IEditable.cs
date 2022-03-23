@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SDL.ECommerce.Api.Model
+﻿namespace SDL.ECommerce.Api.Model
 {
     /// <summary>
     /// Markes a specific E-Commerce entity (facet, promotion etc) as editable. When entering XPM

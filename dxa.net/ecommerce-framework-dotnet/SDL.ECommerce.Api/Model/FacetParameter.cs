@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SDL.ECommerce.Api
 {
@@ -28,9 +27,9 @@ namespace SDL.ECommerce.Api
             GREATER_THAN
         }
 
-        private static Regex RANGE_PATTERN = new Regex(@"([0-9]+[\\.0-9]*)\\-([0-9]+[\\.0-9]*)");
-        private static Regex LESS_THAN_PATTERN = new Regex(@"<([0-9]+[\\.0-9]*)");
-        private static Regex GREATER_THAN_PATTERN = new Regex(@">([0-9]+[\\.0-9]*)");
+        private static Regex RANGE_PATTERN = new Regex(@"(?'min'[0-9]+[\.0-9]*)-(?'max'[0-9]+[\.0-9]*)", RegexOptions.Compiled);
+        private static Regex LESS_THAN_PATTERN = new Regex(@"<(?'lt'[0-9]+[\\.0-9]*)", RegexOptions.Compiled);
+        private static Regex GREATER_THAN_PATTERN = new Regex(@">(?'gt'[0-9]+[\\.0-9]*)", RegexOptions.Compiled);
 
         private string _name;
         private List<string> _values = new List<string>();
@@ -67,22 +66,21 @@ namespace SDL.ECommerce.Api
             else if ( rangeMatcher.Success )
             {
                 this.type = ParameterType.RANGE;
-                String min = rangeMatcher.Value;
-                rangeMatcher = rangeMatcher.NextMatch();
-                String max = rangeMatcher.Value;
+                String min = rangeMatcher.Groups["min"].Value;
+                String max = rangeMatcher.Groups["max"].Value;
                 this._values.Add(min);
                 this._values.Add(max);
             }
             else if ( lessThanMatcher.Success )
             {
                 this.type = ParameterType.LESS_THAN;
-                String value = lessThanMatcher.Value;
+                String value = lessThanMatcher.Groups["lt"].Value;
                 this._values.Add(value);
             }
             else if (greaterThanMatcher.Success )
             {
                 this.type = ParameterType.GREATER_THAN;
-                String value = greaterThanMatcher.Value;
+                String value = greaterThanMatcher.Groups["gt"].Value;
                 this._values.Add(value);
             }
             else
@@ -156,6 +154,14 @@ namespace SDL.ECommerce.Api
             get
             {
                 return type;
+            }
+        }
+
+        public bool IsHidden
+        {
+            get
+            {
+                return this._name.EndsWith("_hidden");
             }
         }
 

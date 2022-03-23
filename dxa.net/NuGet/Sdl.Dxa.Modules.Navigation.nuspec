@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>Sdl.Dxa.Modules.Navigation</id>
+    <version>1.2.0</version>
+    <authors>Sdl</authors>
+    <owners>Sdl</owners>
+    <summary></summary>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Sdl.Dxa.Modules.Navigation.</description>
+    <releaseNotes></releaseNotes>
+	<copyright>© Sdl 2018</copyright>
+    <dependencies>
+      <dependency id="SDL.ECommerce.Dxa" version="1.2.0" />
+    </dependencies>
+  </metadata>
+  <files>
+	<file src="SDL.DXA.Modules.Navigation\bin\SDL.DXA.Modules.Navigation.dll" target="lib\net452" />
+	<file src="SDL.DXA.Modules.Navigation\Areas\**\*.*" target="Content\Areas" />
+  </files>
+</package>

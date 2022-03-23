@@ -31,7 +31,7 @@ namespace SDL.ECommerce.Ecl
         /// <param name="publicationId"></param>
         /// <param name="pageIndex"></param>
         /// <returns></returns>
-        QueryResult GetProducts(string categoryId, int publicationId = 0, int pageIndex = 0);
+        QueryResult GetCategoryAndProducts(string categoryId, int publicationId = 0, int pageIndex = 0);
 
         /// <summary>
         /// Search products in specified category. If categoryId is NULL a full search is done.

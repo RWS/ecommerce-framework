@@ -24,7 +24,7 @@ public class GenericLocation implements Location {
     }
 
     public GenericLocation(Category category, List<FacetParameter> facets) {
-        this.categoryRef = new CategoryRef(category);
+        this.categoryRef = category != null ? new CategoryRef(category) : null;
         this.facets = facets;
     }
 

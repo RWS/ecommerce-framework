@@ -33,6 +33,11 @@ public class HybrisCartService implements CartService {
 
     @Override
     public Cart addProductToCart(String cartId, String sessionId, String productId, int quantity) throws ECommerceException {
+
+        // TODO: Clear up when it comes to cart ID vs session ID
+        // For now we use cart ID as session ID
+        //
+        sessionId = cartId;
         try {
             com.sdl.ecommerce.hybris.api.model.Cart cart = this.hybrisClientManager.getInstance().addItemToCart(toHybrisSessionId(sessionId), productId, quantity);
             return new HybrisCart(cart, sessionId, this.productDetailService);
@@ -44,6 +49,11 @@ public class HybrisCartService implements CartService {
 
     @Override
     public Cart removeProductFromCart(String cartId, String sessionId, String productId) throws ECommerceException {
+
+        // TODO: Clear up when it comes to cart ID vs session ID
+        // For now we use cart ID as session ID
+        //
+        sessionId = cartId;
         try {
             com.sdl.ecommerce.hybris.api.model.Cart cart = this.hybrisClientManager.getInstance().removeItemFromCart(toHybrisSessionId(sessionId), productId);
             return new HybrisCart(cart, sessionId, this.productDetailService);

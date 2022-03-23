@@ -2,6 +2,7 @@ package com.sdl.ecommerce.api.model.impl;
 
 import com.sdl.ecommerce.api.model.Facet;
 import com.sdl.ecommerce.api.model.FacetGroup;
+import com.sdl.ecommerce.api.model.NameValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class GenericFacetGroup implements FacetGroup {
     private String title;
     private boolean isCategory;
     private List<Facet> facets = new ArrayList<>();
+    private List<NameValue> attributes = null;
     private String editUrl;
 
     public GenericFacetGroup(String id, String title, boolean isCategory) {
@@ -30,6 +32,14 @@ public class GenericFacetGroup implements FacetGroup {
         this.title = title;
         this.isCategory = isCategory;
         this.editUrl = editUrl;
+    }
+
+    public GenericFacetGroup(String id, String title, boolean isCategory, String editUrl, List<NameValue> attributes) {
+        this.id = id;
+        this.title = title;
+        this.isCategory = isCategory;
+        this.editUrl = editUrl;
+        this.attributes = attributes;
     }
 
     @Override
@@ -65,5 +75,10 @@ public class GenericFacetGroup implements FacetGroup {
     @Override
     public String getEditUrl() {
         return this.editUrl;
+    }
+
+    @Override
+    public List<NameValue> getAttributes() {
+        return attributes;
     }
 }

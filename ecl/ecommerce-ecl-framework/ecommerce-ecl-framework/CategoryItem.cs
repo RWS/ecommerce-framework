@@ -73,12 +73,14 @@ namespace SDL.ECommerce.Ecl
             {
                 if (category.Parent == null)
                 {
-                    //return EclProvider.HostServices.CreateEclUri(Id.PublicationId, Id.MountPointId);
-                    return EclProvider.HostServices.CreateEclUri(Id.PublicationId, Id.MountPointId, "Products", "category", EclItemTypes.Folder);
+                    // Return 'Products' type folder
+                    //
+                    return EclProvider.HostServices.CreateEclUri(Id.PublicationId, Id.MountPointId, "Type_Products", "category", EclItemTypes.Folder);
                 }
                 else
                 {
-                    // return parent folder
+                    // Return parent folder
+                    //
                     return EclProvider.HostServices.CreateEclUri(
                         Id.PublicationId,
                         Id.MountPointId,

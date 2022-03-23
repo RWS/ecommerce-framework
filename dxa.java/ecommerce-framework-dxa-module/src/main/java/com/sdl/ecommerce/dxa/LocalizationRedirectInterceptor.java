@@ -32,7 +32,8 @@ public class LocalizationRedirectInterceptor extends HandlerInterceptorAdapter {
         String pathPrefix = localization.getPath();
         if ( requestUri.startsWith(pathPrefix) ) {
             requestUri = requestUri.replaceFirst(pathPrefix, "");
-            if ( requestUri.startsWith("/c") || requestUri.startsWith("/p") || requestUri.startsWith("/search") ) {
+            // TODO: Have these prefixes configurable
+            if ( requestUri.startsWith("/c") || requestUri.startsWith("/p") || requestUri.startsWith("/search") || requestUri.startsWith("/ajax/cart") ) {
                 // Forward request to custom E-Commerce page controllers
                 //
                 servletContext.getRequestDispatcher(requestUri).forward(request, response);

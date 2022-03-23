@@ -1,0 +1,101 @@
+# E-Commerce Micro Service Configuration
+#
+
+# Spring Boot
+#
+server:
+  port: 8097
+
+spring:
+  jackson:
+    default-property-inclusion: non_null
+
+# Graph QL
+#
+
+com.merapar.graphql:
+  rootQueryName: "queries"
+  rootQueryDescription: ""
+  rootMutationName: "mutations"
+  rootMutationDescription: ""
+  requestMapping:
+    path: "/ecommerce.svc/graphql/v1"
+  executor:
+    minimumThreadPoolSize: 10
+    maximumThreadPoolSize: 100
+    keepAliveTimeInSeconds: 30
+
+# Fredhopper Connector
+#
+fredhopper:
+  queryserver:
+    url: [Fredhopper URL, e.g. http://localhost:8180]
+  adminserver:
+    url: [Fredhopper URL, e.g. http://localhost:8180]
+  access:
+    username:
+    password:
+  admin:
+    username: [Username to Fredhopper Business Manager]
+    password: [Password to Fredhopper Business Manager]
+  imageurl:
+    mappings: #http://demo.fredhopper.com/images=/fredhopper-images
+  variant:
+        #builder: facetVariantBuilder
+        #prefix: [Prefix for the variant facets, e.g. variant_]
+        builder: aggregatedJsonVariantBuilder
+        aggregatedJsonAttributeName: [Attribute name where aggregated JSON is stored, e.g. pdp_info]
+        variantIdAttributeName: [Attribute name for the variant ID, e.g. variant_sku_identifer]
+        exposedVariants: [What variants that are exposed to the E-Com client, e.g. variant_colour,variant_size]
+        ignoredValues: [Variant values to be ingored, for like size=0]
+
+
+# Hybris Connector
+#
+hybris:
+  url: [Hybris URL, e.g. http://localhost:9001/rest/v1/]
+  username: [Hybris username]
+  password: [Hybris password]
+  mediaUrlPrefix: [Hybris media prefix, e.g. http://localhost:9001]
+  categoryExpiryTimeout: 6000000
+
+
+# Demandware connector
+#
+demandware:
+  url: [URL to Demandware cloud instance, e.g. http://site-dw.demandware.net/s/]
+  clientId: [API client ID]
+  categoryExpiryTimeout: 600000
+  trustAllSSLCerts: [If all certs should be trusted or not - should only be 'true' for dev&test setups]
+
+# Localization properties
+#
+localization:
+  defaultLocale: [default locale]
+  locales:
+    "[locale #1]":
+      # Fredhopper
+      #
+      fredhopper-universe: [Fredhopper universe, e.g. catalog01]
+      fredhopper-locale: [locale]
+      fredhopper-productModelMappings: [model mappings to Fredhopper catalog attributes, e.g "name=name;description=description;price=price;thumbnailUrl=_thumburl;primaryImageUrl=_imageurl;variantId=variant_sku"]
+      fredhopper-triggerMappings: [mapping of ADF claims to Fredhopper triggers, e.g "taf:claim:segment=fh_keyword"]
+      # Hybris
+      #
+      hybris-siteId: [Hybris site ID, e.g. apparel-uk]
+      hybris-activeServiceCatalog: [Hybris active service catalog, e.g. /catalogs/apparelProductCatalog/Online]
+      hybris-catalogBranch: [Hybris catagory branch to use to flatten the tree, e.g. /categories (optional)]
+      hybris-language: [Language, e.g. en]
+      hybris-currency: [Currency, eg. GBP]
+      hybris-excludeFacets: [Facets to be excluded, e.g. availableInStores,collection,gender]
+      hybris-flyoutFacets: [Facets to be included in the flyout navigation, e.g. brand]
+      # Demandware
+      #
+      demandware-flyoutFacets: [Facets to be included in the flyout navigation, e.g. brand,price]
+      demandware-siteId: [Demandware site ID, e.g. Sites-Genesis-Site]
+      demandware-locale: [Locale to be used towards Demandware]
+      demandware-currency: [Currency]
+    "[locale 2]":
+      ...
+
+

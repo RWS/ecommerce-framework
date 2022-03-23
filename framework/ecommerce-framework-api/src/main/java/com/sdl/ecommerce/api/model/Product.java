@@ -11,13 +11,19 @@ import java.util.Map;
 public interface Product {
 
     /**
-     * Get product ID/SKU.
+     * Get product ID
      * @return id
      */
     String getId();
 
     /**
-     * Get product variant ID. If NULL no variant ID is available for current product.
+     * Get master product ID. If this product is a variant, this ID could point to the master product.
+     * @return master ID
+     */
+    String getMasterId();
+
+    /**
+     * Get product variant ID. If NULL no variant ID is available for current product, i.e. is a master product.
      * Variant ID is normally referencing to a concrete product selection with a particular color, size etc.
      * @return variant id
      */
@@ -66,12 +72,7 @@ public interface Product {
      * Get all additional attributes of the product. Can for example be used in compare views etc.
      * @return list of attributes
      */
-
-    // TODO: Use Map<String,List<String>> here instead?? To make it easier to map over OData???
-    // TODO: Have an AttributeValue representation here that indicate formatted value, raw value, type, single/multi value etc?
-    // TODO: Consider to use the same model as for variant attributes?
-
-    Map<String,Object> getAttributes();
+    List<ProductAttribute> getAttributes();
 
     /**
      * Get product variants (if any)
@@ -83,12 +84,14 @@ public interface Product {
      * If current product is an variant this list is populated with selected variant attributes
      * @return list of variant attributes
      */
-    List<ProductVariantAttribute> getVariantAttributes();
+    List<ProductAttribute> getVariantAttributes();
 
     /**
      * Get all available variant attribute types for this product, e.g. color, size. The type also contain all possible values.
      * @return list of variant attribute types
      */
     List<ProductVariantAttributeType> getVariantAttributeTypes();
+
+    VariantLinkType getVariantLinkType();
 
 }

@@ -1,49 +1,81 @@
-﻿using Sdl.Web.Common.Logging;
-using Sdl.Web.Mvc.Controllers;
-using System.Web.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Sdl.Web.Mvc.Configuration;
-using SDL.ECommerce.Api.Model;
-using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Models;
-
-namespace SDL.ECommerce.DXA.Controllers
+﻿namespace SDL.ECommerce.DXA.Controllers
 {
+    using Sdl.Web.Common.Logging;
+
+    using System.Web.Mvc;
+    using Api.Model;
+    using Api.Service;
+    using Sdl.Web.Common.Models;
+
+    using SDL.ECommerce.Api;
+    using SDL.ECommerce.DXA.Servants;
+    using SDL.ECommerce.DXA.Factories;
+
+    using Sdl.Web.Mvc.Configuration;
+    using Query = Api.Model.Query;
+
+
     /// <summary>
     /// E-Commerce Category Page Controller
     /// </summary>
     public class CategoryPageController : AbstractECommercePageController
     {
-        public ActionResult CategoryPage(string categoryUrl)
+        private readonly IECommerceClient _eCommerceClient;
+
+        private readonly IECommerceLinkResolver _linkResolver;
+
+        private readonly IHttpContextServant _httpContextServant;
+
+        private readonly IPathServant _pathServant;
+
+        public CategoryPageController()
+        {
+            _eCommerceClient = DependencyFactory.Current.Resolve<IECommerceClient>();
+            _linkResolver = DependencyFactory.Current.Resolve<IECommerceLinkResolver>();
+            _httpContextServant = DependencyFactory.Current.Resolve<IHttpContextServant>();
+            _pathServant = DependencyFactory.Current.Resolve<IPathServant>();
+        }
+
+        public virtual ActionResult CategoryPage(string categoryUrl)
         {
             Log.Info("Entering category page controller with URL: " + categoryUrl);
-            
-            if ( String.IsNullOrEmpty(categoryUrl) )
+
+            if (string.IsNullOrEmpty(categoryUrl))
             {
                 categoryUrl = "/";
             }
+            
+            PageModel templatePage;
 
-            // Get facets
-            //
-            var facets = GetFacetParametersFromRequest();
+            var category = _eCommerceClient.CategoryService.GetCategoryByPath(categoryUrl);
 
-            PageModel templatePage = null;
-            var category = ECommerceContext.Client.CategoryService.GetCategoryByPath(categoryUrl);
-            if ( category != null )
+            if (category != null)
             {
-                templatePage = this.ResolveTemplatePage(this.GetSearchPath(categoryUrl, category));
-                templatePage.Title = category.Name;
-                SetupViewData(templatePage);
+                templatePage = PageModelServant.ResolveTemplatePage(_pathServant.GetSearchPath(categoryUrl, category), ContentProvider);
 
-                var query = new Api.Model.Query { Category = category, Facets = facets, StartIndex = GetStartIndex() };
-                this.GetQueryContributions(templatePage, query);
-                var searchResult = ECommerceContext.Client.QueryService.Query(query);
-                if ( searchResult.RedirectLocation != null )
+                PageModelServant.SetTemplatePage(templatePage);
+
+                templatePage = EnrichPageModelWithCategoryData(templatePage, category);
+
+                SetupViewData(templatePage);
+                WebRequestContext.PageModel = templatePage;
+
+                var facets = _httpContextServant.GetFacetParametersFromRequest(HttpContext);
+
+                var query = new Query
+                                {
+                                    Category = category,
+                                    Facets = facets,
+                                    StartIndex = _httpContextServant.GetStartIndex(HttpContext)
+                                };
+
+                PageModelServant.GetQueryContributions(templatePage, query);
+
+                var searchResult = ExecuteQuery(_eCommerceClient.QueryService, query);
+
+                if (searchResult?.RedirectLocation != null)
                 {
-                    return Redirect(ECommerceContext.LinkResolver.GetLocationLink(searchResult.RedirectLocation));
+                   return Redirect(_linkResolver.GetLocationLink(searchResult.RedirectLocation));
                 }
 
                 ECommerceContext.Set(ECommerceContext.CURRENT_QUERY, query);
@@ -55,40 +87,23 @@ namespace SDL.ECommerce.DXA.Controllers
             else
             {
                 Log.Warn("Category page with URL: /" + categoryUrl + " does not exists.");
+
                 return NotFound();
             }
 
             return View(templatePage);
         }
 
-        /// <summary>
-        /// Get search path to find an appropriate CMS template page for current category.
-        /// </summary>
-        /// <param name="url"></param>
-        /// <param name="category"></param>
-        /// <returns></returns>
-        protected IList<string> GetSearchPath(string url, ICategory category)
+        protected virtual PageModel EnrichPageModelWithCategoryData(PageModel templatePage, ICategory category)
         {
-            var searchPath = new List<string>();
+            templatePage.Title = category.Name;
 
-            var basePath = ECommerceContext.LocalizePath("/categories/");
-            var categoryPath = basePath;
-            var currentCategory = category;
-            while ( currentCategory != null)
-            {
-                searchPath.Add(categoryPath + currentCategory.Id);
-                currentCategory = currentCategory.Parent;
-            }
-            var urlTokens = url.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach ( var token in urlTokens )
-            {
-                categoryPath += token;
-                searchPath.Insert(0, categoryPath);
-                categoryPath += "-";
-            }
-            searchPath.Add(basePath + "generic");
-            return searchPath;
+            return templatePage;
         }
 
+        protected virtual IProductQueryResult ExecuteQuery(IProductQueryService productQueryService, Query query)
+        {
+            return productQueryService.Query(query);
+        }
     }
 }

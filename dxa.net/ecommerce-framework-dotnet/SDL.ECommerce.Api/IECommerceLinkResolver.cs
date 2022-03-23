@@ -1,9 +1,6 @@
 ﻿using SDL.ECommerce.Api.Model;
-using System;
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SDL.ECommerce.Api
 {
@@ -70,13 +67,20 @@ namespace SDL.ECommerce.Api
         string GetProductDetailLink(IProduct product);
 
         /// <summary>
+        /// Get link to a product variant page using products variant id. If the variant id is not available a fallback will be done on the product ID.
+        /// </summary>
+        /// <param name="product"></param>
+        /// <returns></returns>
+        string GetProductVariantDetailLink(IProduct product);
+
+        /// <summary>
         /// Get link to product variant page using specified variant attribute
         /// </summary>
         /// <param name="product"></param>
         /// <param name="variantAttributeId"></param>
         /// <param name="variantAttributeValueId"></param>
+        /// <param name="isPrimary"></param>
         /// <returns></returns>
-        string GetProductDetailVariantLink(IProduct product, string variantAttributeId, string variantAttributeValueId);
-
+        string GetProductDetailVariantLink(IProduct product, string variantAttributeId, string variantAttributeValueId, bool isPrimary);
     }
 }

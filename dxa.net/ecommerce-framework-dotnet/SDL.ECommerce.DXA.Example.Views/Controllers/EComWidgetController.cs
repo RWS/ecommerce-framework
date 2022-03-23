@@ -1,8 +1,4 @@
-﻿using SDL.ECommerce.DXA.Controller;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using SDL.ECommerce.DXA.Controllers;
 
 namespace SDL.ECommerce.DXA.Example.Views.Controllers
 {

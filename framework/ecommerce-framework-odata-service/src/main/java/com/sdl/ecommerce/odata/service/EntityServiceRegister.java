@@ -41,6 +41,7 @@ public class EntityServiceRegister {
                 ODataProductSummary.class,
                 ODataProductPrice.class,
                 ODataProductAttribute.class,
+                ODataProductAttributeValue.class,
                 ODataFacetGroup.class,
                 ODataFacet.class,
                 ODataQuerySuggestion.class,
@@ -55,7 +56,6 @@ public class EntityServiceRegister {
                 ODataCart.class,
                 ODataCartItem.class,
                 ODataProductVariant.class,
-                ODataProductVariantAttribute.class,
                 ODataProductVariantAttributeType.class,
                 ODataProductVariantAttributeValueType.class,
 

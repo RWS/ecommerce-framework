@@ -14,6 +14,8 @@ The Hybris connector implements the following E-Commerce Framework capabilities:
 
 The connector has been verified against OCC v1 (Omni Commerce Connect) on hybris Commerce Suite 5.x
 
+Note: This connector is deprecated in favour of the new Hybris connector for the Tridion Integration Framework.
+
 Configuration
 ---------------
 

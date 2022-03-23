@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<id>Sdl.ECommerce.Formatting</id>
+    <version>1.2.0</version>
+    <authors>Sdl</authors>
+    <owners>Sdl</owners>
+    <summary></summary>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+	<description>Sdl ECommerce Formatting.</description>
+    <releaseNotes></releaseNotes>
+	<copyright>© Sdl 2018</copyright>
+  </metadata>
+  <files>
+	<file src="SDL.ECommerce.Dxa\bin\SDL.ECommerce.Formatting.dll" target="lib\net452" />
+  </files>
+</package>

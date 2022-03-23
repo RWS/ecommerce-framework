@@ -1,16 +1,13 @@
 package com.sdl.ecommerce.fredhopper.admin;
 
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.apache.commons.httpclient.*;
-import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tika.Tika;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -29,7 +26,6 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.*;
 import java.io.*;
 import java.util.Enumeration;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -59,7 +55,7 @@ public class AdminProxyController {
     @Value("${fredhopper.adminserver.url:#{null}}")
     private String fredhopperBaseUrl = "http://localhost:8180";
 
-    @Value("${fredhopper.access.username:#{null}")
+    @Value("${fredhopper.access.username:#{null}}")
     private String accessUsername = null;
     @Value("${fredhopper.access.password:#{null}}")
     private String accessPassword = null;
@@ -69,12 +65,20 @@ public class AdminProxyController {
     @Value("${fredhopper.admin.password:#{null}}")
     private String password;
 
+    @Value("${fredhopper.edit.cacheDir:#{null}}")
+    private String cacheDirectory;
+
+    @Value("${fredhopper.version:8.5}")
+    private double fredhopperVersion;
+
     private long sessionTimeout = 1 * 60 * 1000; // TODO: Have configurable
     private long lastAccessTime;
     private boolean isInitialized = false;
 
     private HttpClient client;
     private MultiThreadedHttpConnectionManager connectionManager;
+
+    private Tika tika = new Tika();
 
     @PostConstruct
     public void initialize() throws IOException {
@@ -177,7 +181,7 @@ public class AdminProxyController {
         try {
             Enumeration<String> headerNames = request.getHeaderNames();
             while (headerNames.hasMoreElements()) {
-                String headerName = headerNames.nextElement();
+                String headerName = headerNames.nextElement().toLowerCase();
                 if (headerName.startsWith("wicket") || headerName.startsWith("x-") || headerName.startsWith("accept") || headerName.startsWith("user-agent")) {
                     method.setRequestHeader(headerName, request.getHeader(headerName));
                 }
@@ -210,6 +214,9 @@ public class AdminProxyController {
                     response.getWriter().write(htmlBody);
 
                 } else {
+
+                    // TODO: REFACTOR BELOW CODE
+
                     if (contentEncoding != null && contentEncoding.getValue().equals("gzip")) {
                         if (isAjax) {
                             GZIPInputStream zipStream = new GZIPInputStream(method.getResponseBodyAsStream());
@@ -227,7 +234,19 @@ public class AdminProxyController {
 
                         }
                     } else {
-                        IOUtils.copy(method.getResponseBodyAsStream(), response.getOutputStream());
+                        if (isAjax) {
+                            String htmlBody = IOUtils.toString(method.getResponseBodyAsStream());
+                            htmlBody = htmlBody.replaceAll("\\.jsp", ".jspfh");  // TODO: Do we need to do this? Only probably when having the connectors co-located with DXA.Java
+                            htmlBody = htmlBody.replaceAll("src=\"../../preview/", "src=\"/preview/");
+                            response.getWriter().write(htmlBody);
+                        }
+                        else {
+                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                            IOUtils.copy(method.getResponseBodyAsStream(), byteArrayOutputStream);
+                            byte[] responseData = byteArrayOutputStream.toByteArray();
+                            this.storeCachedResources(fredhopperUrl, responseData);
+                            response.getOutputStream().write(responseData);
+                        }
                     }
                 }
                 response.flushBuffer();
@@ -272,7 +291,7 @@ public class AdminProxyController {
         try {
             Enumeration<String> headerNames = request.getHeaderNames();
             while (headerNames.hasMoreElements()) {
-                String headerName = headerNames.nextElement();
+                String headerName = headerNames.nextElement().toLowerCase();
                 if (headerName.startsWith("wicket") || headerName.startsWith("x-") || headerName.startsWith("accept") || headerName.startsWith("user-agent")) {
                     method.setRequestHeader(headerName, request.getHeader(headerName));
                 }
@@ -338,7 +357,8 @@ public class AdminProxyController {
         this.addStyleToElementsWithId(htmlDoc, "content", "top: 0px;");
         this.addStyleToElementsWithId(htmlDoc, "verticalsplitpanelRightPanel", "margin-left: 0px;");
 
-        htmlDoc.body().append("<script src='/system/assets/scripts/fredhopper-edit-popup.js'></script>");
+        this.addEditPopupJavascript(htmlDoc);
+        //htmlDoc.body().append("<script src='/system/assets/scripts/fredhopper-edit-popup.js'></script>");
 
         return htmlDoc.html();
     }
@@ -371,6 +391,98 @@ public class AdminProxyController {
         }
     }
 
+    protected void addEditPopupJavascript(Document htmlDoc) {
+
+        StringBuilder jsModifications = new StringBuilder();
+
+        jsModifications.append("<script>$(document).ready(function() {\n");
+
+        if (fredhopperVersion < 8.4) {
+
+            // Remove buttons that does not make sense from the edit popup view
+            //
+            jsModifications.append(
+            "    $(\".toolbar-button-container[title='Archive']\").remove();\n" +
+            "    $(\".edit .toolbarShowLabelsDropDown\").remove();\n" +
+            "    $(\".toolbar-button-container[title='Assign/remove labels']\").remove();\n");
+
+            // Add events on the save and cancel buttons to close the popup (to avoid end up in the list view)
+            //
+            jsModifications.append(
+            "    $(\"#synonymSaveButton\").mouseup(function () {\n" +
+            "        setTimeout(function() {\n" +
+            "            window.parent.$('.mfp-close').click();\n" +
+            "        }, 250);\n" +
+            "    });\n" +
+            "    $(\"#synonymCancelButton\").mouseup(function () {\n" +
+            "        setTimeout(function() {\n" +
+            "            window.parent.$('.mfp-close').click();\n" +
+            "        }, 250);\n" +
+            "    });\n" +
+            "    $(\".toolbar-button-container[title='Delete']\").mouseup(function () {\n" +
+            "        setTimeout(function() {\n" +
+            "            window.parent.$('.mfp-close').click();\n" +
+            "        }, 250);\n" +
+            "    });\n");
+
+        }
+        else {
+
+            // Modifications for Fredhopper 8.4/8.5 GUI
+            //
+            jsModifications.append(
+            "    var tweakButtons = function() {" +
+            "      $(\".save-and-close-button\").mouseup(function () {\n" +
+            "        setTimeout(function() {\n" +
+            "            window.parent.$('.mfp-close').click();\n" +
+            "        }, 250);\n" +
+            "      });\n" +
+            "      $(\".save-button\").remove();\n" +
+            "      $(\".edit .labels-dropdown-button\").remove();\n" +
+            "      $(\".delete-button\").mouseup(function () {\n" +
+            "        setTimeout(function() {\n" +
+            "            window.parent.$('.mfp-close').click();\n" +
+            "        }, 250);\n" +
+            "      });\n" +
+            "      $(\".cancel-button\").mouseup(function () {\n" +
+            "        setTimeout(function() {\n" +
+            "            window.parent.$('.mfp-close').click();\n" +
+            "        }, 250);\n" +
+            "      });\n" +
+            "    };" +
+            "    tweakButtons();" +
+            "    var activatePressed = function() {\n" +
+            "       setTimeout(function() {\n" +
+            "           tweakButtons();\n" +
+            "           $(\".deactivate-button\").mouseup(deactivatePressed);\n" +
+            "       }, 400);\n };" +
+            "    var deactivatePressed = function() {\n" +
+            "       setTimeout(function() {\n" +
+            "           tweakButtons();\n" +
+            "           $(\".activate-button\").mouseup(activatePressed);\n" +
+            "       }, 400);\n };" +
+            "     $(\".deactivate-button\").mouseup(deactivatePressed);"
+
+            );
+
+        }
+
+        jsModifications.append("});</script>");
+        htmlDoc.body().append(jsModifications.toString());
+
+        if (fredhopperVersion >= 8.4) {
+            htmlDoc.head().append(
+                    "<style>" +
+                    " #main-container { zoom: 80%; }" +
+                    " .k-window { zoom: 80%; }" +
+                    " .k-window .wicket-modal { zoom: 100%; }" +
+                    " .wicket-modal { zoom: 80%; }" +
+                    "</style>");
+        }
+
+
+    }
+
     /**
      * Read cached Fredhopper resource (CSS,JS,images etc) to optimize the experience of
      * the inline edit popup.
@@ -383,6 +495,11 @@ public class AdminProxyController {
         try {
             File cachedAsset = this.getLocalFilename(fredhopperUrl);
             if ( cachedAsset.exists() ) {
+                String contentType = tika.detect(cachedAsset);
+                if ( contentType.equals("text/x-matlab") ) {
+                    contentType = "application/javascript";
+                }
+                response.setContentType(contentType);
                 IOUtils.copy(new FileInputStream(cachedAsset), response.getOutputStream());
                 return true;
             }
@@ -422,14 +539,23 @@ public class AdminProxyController {
      */
     protected File getLocalFilename(String fredhopperUrl) {
 
+        // TODO: Use alternative paths here when running it on Spring Boot??
+
         String filename = fredhopperUrl.replace(fredhopperBaseUrl, "").
                 replace("/fredhopper/admin/wicket/resource", "").
                 replace("/", "_").
                 replace("?", "_").
                 replace("=", "_");
-        return new File(StringUtils.join(new String[]{
-                webApplicationContext.getServletContext().getRealPath("/"), "BinaryData", "fredhopper", "assets", filename
-        }, File.separator));
+        if ( this.cacheDirectory != null ){
+            return new File(StringUtils.join(new String[]{
+                    this.cacheDirectory, "fredhopper", "assets", filename
+            }, File.separator));
+        }
+        else {
+            return new File(StringUtils.join(new String[]{
+                    webApplicationContext.getServletContext().getRealPath("/"), "BinaryData", "fredhopper", "assets", filename
+            }, File.separator));
+        }
     }
 
 }

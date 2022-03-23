@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace SDL.ECommerce.Api.Service
 {
@@ -24,6 +20,6 @@ namespace SDL.ECommerce.Api.Service
         /// <param name="productId"></param>
         /// <param name="variantAttributes"></param>
         /// <returns></returns>
-        IProduct GetDetail(string productId, Dictionary<string, string> variantAttributes);
+        IProduct GetDetail(string productId, IDictionary<string, string> variantAttributes);
     }
 }

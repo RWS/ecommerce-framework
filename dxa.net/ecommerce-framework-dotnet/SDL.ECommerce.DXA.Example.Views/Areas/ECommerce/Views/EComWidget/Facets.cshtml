@@ -10,7 +10,7 @@
             <ul class="category-facets">
                 @foreach (var facet in facetGroup.Facets)
                 {
-                    <li><a href="@ECommerceContext.LinkResolver.GetFacetLink(facet)" class="facet-item">@facet.Title@if (facet.Count > 0) {<text> (@facet.Count)</text>}</a></li>
+                    <li><a href="@LinkResolver.Instance.GetFacetLink(facet)" class="facet-item">@facet.Title@if (facet.Count > 0) {<text> (@facet.Count)</text>}</a></li>
                 }
             </ul>
         }
@@ -18,7 +18,7 @@
         {
             foreach (var facet in facetGroup.Facets)
             { 
-                string facetUrl = ECommerceContext.LinkResolver.GetFacetLink(facet);
+                string facetUrl = LinkResolver.Instance.GetFacetLink(facet);
                 
                 <a href="@facetUrl" class="facet-link">
                     <div class="checkbox facet-item">

@@ -1,6 +1,6 @@
 ﻿@model BreadcrumbWidget
-<div  @Html.DxaEntityMarkup()> 
-    @{ 
+<div  @Html.DxaEntityMarkup()>
+    @{
         var currentCategory = (ICategory) ECommerceContext.Get(ECommerceContext.CATEGORY);
         var rootTitle = (string)ECommerceContext.Get(ECommerceContext.ROOT_TITLE);
         var rootUrlPrefix = (string)ECommerceContext.Get(ECommerceContext.URL_PREFIX);
@@ -25,7 +25,7 @@
             else
             {
                 <li>
-                    <a href="@ECommerceContext.LinkResolver.GetBreadcrumbLink(breadcrumb)">@breadcrumb.Title</a>
+                    <a href="@LinkResolver.Instance.GetBreadcrumbLink(breadcrumb)">@breadcrumb.Title</a>
                 </li>
             }
         }
@@ -34,7 +34,7 @@
     <div class="active-facets">
         @foreach (var breadcrumb in Model.Breadcrumbs.Where(breadcrumb => breadcrumb.IsCategory == false))
         {
-            <a href="@ECommerceContext.LinkResolver.GetBreadcrumbLink(breadcrumb)" class="btn btn-primary">@breadcrumb.Title <i class="fa fa-times"></i></a>
+            <a href="@LinkResolver.Instance.GetBreadcrumbLink(breadcrumb)" class="btn btn-primary">@breadcrumb.Title <i class="fa fa-times"></i></a>
         }
     </div>
 </div>

@@ -25,9 +25,9 @@ namespace SDL.Hybris.Ecl
             schema.Fields.Add(EclProvider.HostServices.CreateMultiLineTextFieldDefinition("Description", "Description", 0, 1, 7));
             schema.Fields.Add(EclProvider.HostServices.CreateSingleLineTextFieldDefinition("Manufacturer", "Manufacturer", 0, 1));
             schema.Fields.Add(EclProvider.HostServices.CreateSingleLineTextFieldDefinition("Purchasable", "Purchasable", 0, 1));
-            schema.Fields.Add(EclProvider.HostServices.CreateNumberFieldDefinition("Price", "Price", 0, 1));
-            schema.Fields.Add(EclProvider.HostServices.CreateNumberFieldDefinition("StockLevel", "StockLevel", 0, 1));
-            schema.Fields.Add(EclProvider.HostServices.CreateNumberFieldDefinition("AverageRating", "AverageRating", 0, 1));
+            schema.Fields.Add(EclProvider.HostServices.CreateSingleLineTextFieldDefinition("Price", "Price", 0, 1));
+            schema.Fields.Add(EclProvider.HostServices.CreateSingleLineTextFieldDefinition("StockLevel", "StockLevel", 0, 1));
+            schema.Fields.Add(EclProvider.HostServices.CreateSingleLineTextFieldDefinition("AverageRating", "AverageRating", 0, 1));
         }
     }
 }

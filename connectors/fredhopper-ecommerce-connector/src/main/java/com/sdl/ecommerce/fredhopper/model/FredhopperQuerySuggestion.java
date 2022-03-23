@@ -24,4 +24,9 @@ public class FredhopperQuerySuggestion implements QuerySuggestion {
     public String getSuggestion() {
         return this.querySuggestion.getValue().getValue();
     }
+
+    @Override
+    public Integer getEstimatedResults() {
+        return this.querySuggestion.getEstimatedResults();
+    }
 }

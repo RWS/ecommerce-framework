@@ -2,7 +2,7 @@ package com.sdl.ecommerce.odata.model;
 
 import com.sdl.ecommerce.api.model.ProductPrice;
 import com.sdl.ecommerce.api.model.ProductVariant;
-import com.sdl.ecommerce.api.model.ProductVariantAttribute;
+import com.sdl.ecommerce.api.model.ProductAttribute;
 import com.sdl.odata.api.edm.annotations.EdmComplex;
 import com.sdl.odata.api.edm.annotations.EdmProperty;
 
@@ -25,7 +25,7 @@ public class ODataProductVariant implements ProductVariant {
     private ODataProductPrice price;
 
     @EdmProperty
-    private List<ODataProductVariantAttribute> attributes;
+    private List<ODataProductAttribute> attributes;
 
     public ODataProductVariant() {}
     public ODataProductVariant(ProductVariant productVariant) {
@@ -35,7 +35,7 @@ public class ODataProductVariant implements ProductVariant {
         }
         if ( productVariant.getAttributes() != null ) {
             this.attributes = new ArrayList<>();
-            productVariant.getAttributes().forEach(attribute -> this.attributes.add(new ODataProductVariantAttribute(attribute)));
+            productVariant.getAttributes().forEach(attribute -> this.attributes.add(new ODataProductAttribute(attribute)));
         }
     }
     @Override
@@ -49,7 +49,7 @@ public class ODataProductVariant implements ProductVariant {
     }
 
     @Override
-    public List<ProductVariantAttribute> getAttributes() {
+    public List<ProductAttribute> getAttributes() {
         return attributes.stream().collect(Collectors.toList());
     }
 }

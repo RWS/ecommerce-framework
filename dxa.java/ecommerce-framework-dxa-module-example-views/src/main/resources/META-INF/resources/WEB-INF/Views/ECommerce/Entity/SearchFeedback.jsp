@@ -10,7 +10,12 @@
             ${entity.spellCheckLabel}
         </div>
         <div style="margin-left: 16px;">
-            <i>${entity.querySuggestions[0].original} -> ${entity.querySuggestions[0].suggestion}</i>
+            <i>${entity.querySuggestions[0].original} ->
+                    ${entity.querySuggestions[0].suggestion}
+                <c:forEach var="suggestion" items="${entity.querySuggestions}">
+                    <span style="margin-right: 8px;"><a href="${entity.getSuggestionUrl(suggestion, localization)}" style="text-decoration: underline;">${suggestion.suggestion}<c:if test="${suggestion.estimatedResults != null}"> (${suggestion.estimatedResults})</c:if></a></span>
+                </c:forEach>
+            </i>
         </div>
     </div>
 </c:if>

@@ -26,6 +26,7 @@ public class Product extends StandardBody {
     private Map<String,String> variation_values;
     private List<ProductVariant> variants;
     private List<VariationAttribute> variation_attributes;
+    private MasterInfo master;
 
     public String getId() {
         return id;
@@ -117,5 +118,9 @@ public class Product extends StandardBody {
 
     public List<VariationAttribute> getVariation_attributes() {
         return variation_attributes;
+    }
+
+    public MasterInfo getMaster() {
+        return master;
     }
 }

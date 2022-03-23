@@ -1,0 +1,37 @@
+<assembly>
+    <id>install</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/deps</directory>
+            <outputDirectory>lib</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/assembly/bin-folder</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>**/**</include>
+            </includes>
+            <filtered>false</filtered>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/assembly/config</directory>
+            <outputDirectory>config</outputDirectory>
+            <includes>
+                <include>**/**</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+
+    <files>
+        <file>
+            <source>${project.build.directory}/ecommerce-rest-service-${project.version}.jar</source>
+            <outputDirectory>lib</outputDirectory>
+        </file>
+    </files>
+
+
+</assembly>

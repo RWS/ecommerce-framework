@@ -18,10 +18,14 @@ public class ODataQuerySuggestion implements QuerySuggestion {
     @EdmProperty
     private String suggestion;
 
+    @EdmProperty
+    private Integer estimatedResults;
+
     public ODataQuerySuggestion() {}
     public ODataQuerySuggestion(QuerySuggestion querySuggestion) {
         this.original = querySuggestion.getOriginal();
         this.suggestion = querySuggestion.getSuggestion();
+        this.estimatedResults = querySuggestion.getEstimatedResults();
     }
 
     @Override
@@ -33,4 +37,7 @@ public class ODataQuerySuggestion implements QuerySuggestion {
     public String getSuggestion() {
         return this.suggestion;
     }
+
+    @Override
+    public Integer getEstimatedResults() { return this.estimatedResults; }
 }

@@ -45,10 +45,14 @@ public class WebServiceController extends AbstractODataController {
         // Extract locale from the request URI
         //
         String requestUri = servletRequest.getRequestURI();
+        LOG.info("Request: " + requestUri);
         StringTokenizer tokenizer = new StringTokenizer(requestUri, "/(?");
         tokenizer.nextToken();
-        String locale = tokenizer.nextToken();
-        if ( this.localizationService.isLocaleDefined(locale) ) {
+        String locale = null;
+        if ( tokenizer.hasMoreTokens() ) {
+            locale = tokenizer.nextToken();
+        }
+        if ( locale != null && this.localizationService.isLocaleDefined(locale) ) {
             LOG.debug("Using locale: " + locale);
 
             // Check registered locales instead!!! Have LocaleManager that keeps track of locale specific configuration

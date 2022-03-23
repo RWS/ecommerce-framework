@@ -3,7 +3,7 @@
     <!-- Properties -->
     <property name="log.pattern" value="%date %-5level %logger{0} - %message%n"/>
     <property name="log.history" value="7"/>
-    <property name="log.folder" value="log/"/>
+	<property name="log.folder" value="${logfolder:-log/}"/>
     <property name="log.level" value="INFO"/>
     <property name="log.encoding" value="UTF-8"/>
 

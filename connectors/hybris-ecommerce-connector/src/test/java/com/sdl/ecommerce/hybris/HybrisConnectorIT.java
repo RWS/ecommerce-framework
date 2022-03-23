@@ -72,7 +72,8 @@ public class HybrisConnectorIT extends GenericTestSuite {
 
     @Test
     public void testCart() throws Exception {
-        this.testCart("676442", "1978440_blue");
+        //this.testCart("676442", "1978440_blue");
+        this.testCart("300649633");
     }
 
 }

@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{055151C2-713C-49DE-85A3-1E073E88CB94}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SDL.ECommerce.Rest</RootNamespace>
+    <AssemblyName>SDL.ECommerce.Rest</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.105.2.3\lib\net45\RestSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ECommerceClient.cs" />
+    <Compile Include="Model\Breadcrumb.cs" />
+    <Compile Include="Model\Cart.cs" />
+    <Compile Include="Model\CartItem.cs" />
+    <Compile Include="Model\Category.cs" />
+    <Compile Include="Model\CategoryRef.cs" />
+    <Compile Include="Model\ContentArea.cs" />
+    <Compile Include="Model\EditMenu.cs" />
+    <Compile Include="Model\Facet.cs" />
+    <Compile Include="Model\FacetGroup.cs" />
+    <Compile Include="Model\InputCartItem.cs" />
+    <Compile Include="Model\LazyCategory.cs" />
+    <Compile Include="Model\Location.cs" />
+    <Compile Include="Model\MenuItem.cs" />
+    <Compile Include="Model\Product.cs" />
+    <Compile Include="Model\ProductAttributeValue.cs" />
+    <Compile Include="Model\ProductPrice.cs" />
+    <Compile Include="Model\ProductQueryResult.cs" />
+    <Compile Include="Model\ProductRef.cs" />
+    <Compile Include="Model\ProductSummary.cs" />
+    <Compile Include="Model\ProductVariant.cs" />
+    <Compile Include="Model\ProductAttribute.cs" />
+    <Compile Include="Model\ProductVariantAttributeType.cs" />
+    <Compile Include="Model\ProductVariantAttributeValueType.cs" />
+    <Compile Include="Model\Promotion.cs" />
+    <Compile Include="Model\QuerySuggestion.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RestClientFactory.cs" />
+    <Compile Include="Service\CartService.cs" />
+    <Compile Include="Service\EditService.cs" />
+    <Compile Include="Service\ErrorMessage.cs" />
+    <Compile Include="Service\ProductCategoryService.cs" />
+    <Compile Include="Service\ProductDetailService.cs" />
+    <Compile Include="Service\ProductQueryService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SDL.ECommerce.Api\SDL.ECommerce.Api.csproj">
+      <Project>{1030d0f7-9334-4864-b495-540e3ad7928c}</Project>
+      <Name>SDL.ECommerce.Api</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SDL.ECommerce.Formatting\SDL.ECommerce.Formatting.csproj">
+      <Project>{e2beacd6-4a49-43b4-8e84-2dc4df9a4690}</Project>
+      <Name>SDL.ECommerce.Formatting</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

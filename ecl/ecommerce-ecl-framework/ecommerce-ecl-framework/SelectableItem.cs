@@ -146,19 +146,35 @@ namespace SDL.ECommerce.Ecl
                 foreach (var metadataName in metadata.Keys)
                 {                  
                     var metadataValue = metadata[metadataName];
+                    bool isXml = metadataName.EndsWith("__xml");
+                    var name = metadataName.Replace("__xml", "");
                     if ( metadataValue is string )
                     {
-                        metadataXml.Append("<" + metadataName + ">");
-                        metadataXml.Append(SecurityElement.Escape(metadataValue as string));
-                        metadataXml.Append("</" + metadataName + ">");
+                        metadataXml.Append("<" + name + ">");
+                        if ( isXml )
+                        {
+                            metadataXml.Append(metadataValue);
+                        }
+                        else
+                        {
+                            metadataXml.Append(SecurityElement.Escape(metadataValue as string));
+                        }                       
+                        metadataXml.Append("</" + name + ">");
                     }
                     else if ( metadataValue is IList )
                     {
                         foreach ( var value in metadataValue as IList<string> )
                         {
-                            metadataXml.Append("<" + metadataName + ">");
-                            metadataXml.Append(SecurityElement.Escape(value));
-                            metadataXml.Append("</" + metadataName + ">");
+                            metadataXml.Append("<" + name + ">");
+                            if ( isXml )
+                            {
+                                metadataXml.Append(value);
+                            }
+                            else
+                            {
+                                metadataXml.Append(SecurityElement.Escape(value));
+                            }                          
+                            metadataXml.Append("</" + name + ">");
                         }
                     }
                                      

@@ -1,11 +1,14 @@
 package com.sdl.ecommerce.dxa.model;
 
 import com.sdl.ecommerce.api.model.QuerySuggestion;
+import com.sdl.webapp.common.api.localization.Localization;
 import com.sdl.webapp.common.api.mapping.semantic.annotations.SemanticEntity;
 import com.sdl.webapp.common.api.mapping.semantic.annotations.SemanticProperty;
 import com.sdl.webapp.common.api.model.RichText;
 import com.sdl.webapp.common.api.model.entity.AbstractEntityModel;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import static com.sdl.webapp.common.api.mapping.semantic.config.SemanticVocabulary.SDL_CORE;
@@ -21,7 +24,6 @@ public class SearchFeedbackWidget extends AbstractEntityModel {
     @SemanticProperty("e:spellCheckLabel")
     private RichText spellCheckLabel;
 
-
     private List<QuerySuggestion> querySuggestions;
 
     public List<QuerySuggestion> getQuerySuggestions() {
@@ -34,6 +36,14 @@ public class SearchFeedbackWidget extends AbstractEntityModel {
 
     public RichText getSpellCheckLabel() {
         return spellCheckLabel;
+    }
+
+    public String getSuggestionUrl(QuerySuggestion suggestion, Localization localization) {
+        try {
+            return localization.localizePath("/search") + "/" + URLEncoder.encode(suggestion.getSuggestion(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return localization.localizePath("/search") + "/" + suggestion.getSuggestion();
+        }
     }
 
 }

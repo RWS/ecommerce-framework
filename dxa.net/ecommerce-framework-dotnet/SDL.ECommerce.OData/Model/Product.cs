@@ -55,25 +55,11 @@ namespace SDL.ECommerce.OData
             }
         }
 
-        IDictionary<string, object> IProduct.Attributes
+        IList<IProductAttribute> IProduct.Attributes
         {
             get
             {
-                IDictionary<string, object> attributes = new Dictionary<string, object>();
-                foreach ( var attribute in this.Attributes )
-                {
-                    object value;
-                    if ( attribute.SingleValue != null )
-                    {
-                        value = attribute.SingleValue;
-                    }
-                    else
-                    {
-                        value = attribute.MultiValue;
-                    }
-                    attributes.Add(attribute.Name, value);
-                }
-                return attributes;
+                return this.Attributes.Cast<IProductAttribute>().ToList();
             }
         }
 
@@ -109,11 +95,11 @@ namespace SDL.ECommerce.OData
             }
         }
 
-        IList<IProductVariantAttribute> IProduct.VariantAttributes
+        IList<IProductAttribute> IProduct.VariantAttributes
         {
             get
             {
-                return this.VariantAttributes.Cast<IProductVariantAttribute>().ToList();
+                return this.VariantAttributes.Cast<IProductAttribute>().ToList();
             }
         }
 
@@ -122,6 +108,14 @@ namespace SDL.ECommerce.OData
             get
             {
                 return this.VariantAttributeTypes.Cast<IProductVariantAttributeType>().ToList();
+            }
+        }
+
+        VariantLinkType IProduct.VariantLinkType
+        {
+            get
+            {
+                return (VariantLinkType) Enum.Parse(typeof(VariantLinkType), this.VariantLinkType);
             }
         }
     }

@@ -7,7 +7,7 @@
         @* Take 3 first products *@
         @foreach (var product in Model.Products.Take(3))
         {
-            <a href="@ECommerceContext.LinkResolver.GetProductDetailLink(product)" class="product-teaser-link" style="display: flex;">
+            <a href="@LinkResolver.Instance.GetProductDetailLink(product)" class="product-teaser-link" style="display: flex;">
                 <div class="col-sm-6">
                     <img src="@product.ThumbnailUrl" width="100%" height="100%" class="teaser-img loader-img" style="margin-bottom: 2px;" />
                 </div>

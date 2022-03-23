@@ -18,4 +18,9 @@ public interface QuerySuggestion {
      */
     String getSuggestion();
 
+    /**
+     * @return estimated results for current suggestion. Returns NULL if there is no estimates available
+     */
+    Integer getEstimatedResults();
+
 }

@@ -5,6 +5,7 @@ import com.sdl.ecommerce.api.ProductDetailService;
 import static com.sdl.ecommerce.dxa.ECommerceRequestAttributes.*;
 
 import com.sdl.ecommerce.api.model.Category;
+import com.sdl.ecommerce.dxa.model.SimpleProduct;
 import com.sdl.webapp.common.api.content.ContentProviderException;
 import com.sdl.webapp.common.api.content.PageNotFoundException;
 import com.sdl.webapp.common.api.localization.Localization;
@@ -81,10 +82,13 @@ public class ProductPageController extends AbstractECommercePageController {
             variantAttributes.put(parameterName, requestParameters.get(parameterName)[0]);
         }
 
-        ProductDetailResult detailResult = this.detailService.getDetail(productId, variantAttributes);
-        if ( detailResult.getProductDetail() == null ) {
-            LOG.warn("Could not find product variant page. Falling back on the main product page");
+        ProductDetailResult detailResult = null;
 
+        if ( variantAttributes.size() > 0 ) {
+            detailResult = this.detailService.getDetail(productId, variantAttributes);
+        }
+
+        if ( detailResult == null || detailResult.getProductDetail() == null ) {
             // Fallback on the product ID without variant attributes
             //
             detailResult = this.detailService.getDetail(productId);
@@ -102,6 +106,54 @@ public class ProductPageController extends AbstractECommercePageController {
             return this.viewResolver.resolveView(mvcData, "Page", request);
         }
         throw new PageNotFoundException("Product detail page not found.");
+    }
+
+    @Override
+    protected Object getDataToBeFormatted(HttpServletRequest request) throws ContentProviderException {
+
+        // TODO: Refactor into one method handling retrieval of the product detail
+
+        final String requestPath = request.getRequestURI().replaceFirst("/p", "");
+        final Localization localization = webRequestContext.getLocalization();
+        final String[] pathTokens = requestPath.split("/");
+        final String productSeoId;
+        String productId;
+        if ( pathTokens.length == 3 ) {
+            productSeoId = pathTokens[1];
+            productId = pathTokens[2];
+        }
+        else if ( pathTokens.length == 2 ) {
+            productSeoId = null;
+            productId = pathTokens[1];
+        }
+        else {
+            throw new PageNotFoundException("Invalid product detail URL.");
+        }
+
+        // Handle some special characters
+        //
+        productId = productId.replace("__plus__", "+");
+
+        // Get variant attributes
+        //
+        Map<String,String> variantAttributes = new HashMap<>();
+        Map<String, String[]> requestParameters = request.getParameterMap();
+        for ( String parameterName : requestParameters.keySet() ) {
+            variantAttributes.put(parameterName, requestParameters.get(parameterName)[0]);
+        }
+
+        ProductDetailResult detailResult = this.detailService.getDetail(productId, variantAttributes);
+        if ( detailResult.getProductDetail() == null ) {
+            LOG.warn("Could not find product variant page. Falling back on the main product page");
+
+            // Fallback on the product ID without variant attributes
+            //
+            detailResult = this.detailService.getDetail(productId);
+        }
+        if ( detailResult != null && detailResult.getProductDetail() != null ) {
+            return new SimpleProduct(detailResult.getProductDetail());
+        }
+        return null;
     }
 
     /**

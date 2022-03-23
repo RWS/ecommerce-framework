@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Caching;
 using System.Xml.Linq;
 using Tridion.ExternalContentLibrary.V2;
 
@@ -17,28 +18,48 @@ namespace SDL.ECommerce.Ecl
         public static readonly XNamespace EcommerceEclNs = "http://sdl.com/ecl/ecommerce"; 
         private static readonly string IconBasePath = Path.Combine(AddInFolder, "Themes");
 
+        static int DEFAULT_CATEGORY_CACHE_TIME = 60*60*60; // Default 1 hour cache
+        static int DEFAULT_CATEGORY_MAX_DEPTH = 4;
+        static int DEFAULT_PRODUCT_PAGE_SIZE = 100;
+        static int DEFAULT_CATEGORY_PAGE_SIZE = 100;
+
+        public static int CategoryCacheTime { get; private set; } = DEFAULT_CATEGORY_CACHE_TIME;
+        public static int CategoryMaxDepth { get; private set; }
+
+        public static int ProductPageSize { get; set; }
+
+        public static int CategoryPageSize { get; set; }
+
         internal static string MountPointId { get; private set; }
         public static IHostServices HostServices { get; private set; }
         public static ProductCatalog ProductCatalog { get; private set; }
-        private static IDictionary<int, Category> rootCategoryMap = new Dictionary<int, Category>();
+
+        private static IDictionary<int, Category> rootCategories = new Dictionary<int, Category>();
 
         /// <summary>
         /// Get root category
         /// </summary>
         internal static Category GetRootCategory(int publicationId) {
-
             Category rootCategory;
-            rootCategoryMap.TryGetValue(publicationId, out rootCategory);
-            if (rootCategory == null )
-            {
-                //lock ( EclProvider.EcommerceEclNs ) LOCK IS NOT NEEDED HERE, RIGHT?
-                //{
-                    rootCategory = ProductCatalog.GetAllCategories(publicationId);
-                    rootCategoryMap.Add(publicationId, rootCategory);
-                //}
+            if (!rootCategories.TryGetValue(publicationId, out rootCategory))
+            {               
+                rootCategory = ProductCatalog.GetAllCategories(publicationId);
+                rootCategories.Add(publicationId, rootCategory);   
             }
             return rootCategory;
+        }
 
+        public static int GetIntConfigurationValue(XElement configuration, string configName, int defaultValue)
+        {
+            var value = configuration.Element(EclProvider.EcommerceEclNs + configName);
+            if (value != null)
+            {
+                return Int32.Parse(value.Value);
+            }
+            else
+            {
+                return defaultValue;
+            }
         }
 
         internal static string AddInFolder
@@ -66,10 +87,10 @@ namespace SDL.ECommerce.Ecl
         /// Get all available catagories in a flat list
         /// </summary>
         /// <returns></returns>
-        internal static List<Category> GetAllCategories(int publicationId)
+        internal static List<Category> GetAllCategories(int publicationId, int maxLevel)
         {
             var allCategories = new List<Category>();
-            GetCategories(GetRootCategory(publicationId), allCategories);
+            GetCategories(GetRootCategory(publicationId), allCategories, 0, maxLevel);
             /*
             allCategories.Sort(delegate(Category x, Category y)
             {
@@ -79,12 +100,15 @@ namespace SDL.ECommerce.Ecl
             return allCategories;
         }
 
-        private static void GetCategories(Category category, List<Category> categories)
+        private static void GetCategories(Category category, List<Category> categories, int level, int maxLevel)
         {
             foreach (var subCategory in category.Categories)
             {
                 categories.Add(subCategory);
-                GetCategories(subCategory, categories);
+                if (level < maxLevel)
+                { 
+                    GetCategories(subCategory, categories, level + 1, maxLevel);
+                }
             }
         }
 
@@ -143,6 +167,19 @@ namespace SDL.ECommerce.Ecl
             // Initialize the product catalog with config
             //
             ProductCatalog = this.CreateProductCatalog(config);
+
+            // Read category cache time (which generically managed by the E-Commerce framework)
+            //
+            CategoryCacheTime = GetIntConfigurationValue(config, "CategoryCacheTime", DEFAULT_CATEGORY_CACHE_TIME);
+
+            // Read category max depth in category listings
+            //
+            CategoryMaxDepth = GetIntConfigurationValue(config, "CategoryMaxDepth", DEFAULT_CATEGORY_MAX_DEPTH);
+
+            // Read max items in result lists
+            //
+            ProductPageSize = EclProvider.GetIntConfigurationValue(config, "ProductPageSize", DEFAULT_PRODUCT_PAGE_SIZE);
+            CategoryPageSize = EclProvider.GetIntConfigurationValue(config, "CategoryPageSize", DEFAULT_CATEGORY_PAGE_SIZE);
         }
 
         /// <summary>
@@ -152,7 +189,7 @@ namespace SDL.ECommerce.Ecl
         /// <returns></returns>
         protected abstract ProductCatalog CreateProductCatalog(XElement configuration);
 
-        public abstract IContentLibraryContext CreateContext(IEclSession tridionUser);
+        public abstract IContentLibraryContext CreateContext(IEclSession session);
 
         public IList<IDisplayType> DisplayTypes
         {

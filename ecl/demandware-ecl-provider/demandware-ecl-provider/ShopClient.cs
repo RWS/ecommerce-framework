@@ -94,7 +94,7 @@ namespace SDL.Demandware.Ecl
 
         public IList<DemandWareProduct> GetProducts(String categoryId, int count)
         {        
-            String jsonResponse = JsonGetRequest(this.dwBaseUrl + "/product_search/images" + clientIdRequestParam +
+            string jsonResponse = JsonGetRequest(this.dwBaseUrl + "/product_search/images" + clientIdRequestParam +
                 "&refine_1=cgid%3D" + categoryId + "&count=" + count);
 
             ProductSearchResult result = JsonConvert.DeserializeObject<ProductSearchResult>(jsonResponse);
@@ -104,6 +104,21 @@ namespace SDL.Demandware.Ecl
                 product.category_id = categoryId;
             }
             return products;            
+        }
+
+        public IList<DemandWareProduct> Search(string searchPhrase, String categoryId, int count)
+        {
+            var refinements = "";
+            if (categoryId != null)
+            {
+                refinements = "&refine_1=cgid%3D" + categoryId;
+            }
+            string jsonResponse = JsonGetRequest(this.dwBaseUrl + "/product_search/images" + clientIdRequestParam +
+                "&q=" + searchPhrase + refinements + "&count=" + count);
+           
+            ProductSearchResult result = JsonConvert.DeserializeObject<ProductSearchResult>(jsonResponse);
+            var products = result.hits;
+            return products;
         }
 
         public DemandWareProduct GetProduct(String productId)

@@ -13,10 +13,7 @@ import com.sdl.ecommerce.dxa.ECommerceViewHelper;
 import com.sdl.ecommerce.dxa.model.*;
 import com.sdl.webapp.common.api.WebRequestContext;
 import com.sdl.webapp.common.api.content.ContentProviderException;
-import com.sdl.webapp.common.api.model.EntityModel;
-import com.sdl.webapp.common.api.model.MvcData;
-import com.sdl.webapp.common.api.model.PageModel;
-import com.sdl.webapp.common.api.model.RegionModel;
+import com.sdl.webapp.common.api.model.*;
 import com.sdl.webapp.common.controller.BaseController;
 import static com.sdl.webapp.common.controller.RequestAttributeNames.PAGE_MODEL;
 
@@ -30,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -216,25 +214,7 @@ public class WidgetController extends BaseController {
 
         PromotionsWidget entity = (PromotionsWidget) this.getEntityFromRequest(request, entityId);
 
-        ECommerceResult result;
-        if ( entity.getCategoryReference() != null ) {
-            Category category = this.resolveCategoryModel(entity.getCategoryReference());
-            Query query = this.queryService.newQuery();
-            query.category(category);
-            if ( entity.getViewType() != null ) {
-                query.viewType(ViewType.valueOf(entity.getViewType().toUpperCase()));
-            }
-            result = this.queryService.query(query);
-        }
-        else if ( entity.getProductReference() != null ) {
-            result = this.resolveProductDetail(entity.getProductReference());
-        }
-        else {
-            result = this.getResult(request);
-        }
-        if ( result != null ) {
-            entity.setPromotions(result.getPromotions());
-        }
+        this.getPromotions(entity, request);
 
         request.setAttribute("entity", entity);
         request.setAttribute("viewHelper", this.viewHelper);
@@ -259,7 +239,7 @@ public class WidgetController extends BaseController {
         if ( entity.getCategoryReference() != null ) {
             Category topCategory = this.resolveCategoryModel(entity.getCategoryReference());
             if (topCategory != null) {
-                entity.getCategoryReference().setCategoryUrl(this.linkResolver.getCategoryLink(topCategory)); // For flyout is the URL's always based on the category url pattern
+                entity.getCategoryReference().setCategoryUrl(this.linkResolver.getNonContextualCategoryLink(topCategory)); // For flyout is the URL's always based on the category url pattern
 
                 boolean useCache = this.isSessionPreview(request) == false;
 
@@ -559,6 +539,29 @@ public class WidgetController extends BaseController {
         return category;
     }
 
+    protected void getPromotions(PromotionsWidget entity, HttpServletRequest request) throws ContentProviderException {
+        ECommerceResult result;
+        if ( entity.getCategoryReference() != null ) {
+            Category category = this.resolveCategoryModel(entity.getCategoryReference());
+            Query query = this.queryService.newQuery();
+            query.category(category);
+            if ( entity.getViewType() != null ) {
+                query.viewType(ViewType.valueOf(entity.getViewType().toUpperCase()));
+            }
+            result = this.queryService.query(query);
+        }
+        else if ( entity.getProductReference() != null ) {
+            result = this.resolveProductDetail(entity.getProductReference());
+        }
+        else {
+            result = this.getResult(request);
+        }
+        if ( result != null ) {
+            entity.setPromotions(result.getPromotions());
+        }
+
+    }
+
     /**
      * Get current URL prefix (category or search result page).
      * @param request
@@ -722,4 +725,40 @@ public class WidgetController extends BaseController {
 
     }
 
+    @Override
+    protected ViewModel enrichModel(ViewModel model, HttpServletRequest httpServletRequest) throws Exception {
+        try {
+            if (model instanceof PromotionsWidget) {
+
+                PromotionsWidget promotionsWidget = (PromotionsWidget) model;
+                this.getPromotions(promotionsWidget, httpServletRequest);
+
+                // Simplify the result so it can be serialized
+                //
+                Category category = promotionsWidget.getCategoryReference().getCategory();
+                if ( category != null ) {
+                    category = new SimpleCategory(category);
+                }
+                promotionsWidget.getCategoryReference().setCategory(category);
+
+                if ( promotionsWidget.getPromotions() != null ) {
+                    ArrayList<Promotion> promotions = new ArrayList<>();
+                    for (Promotion promotion : promotionsWidget.getPromotions()) {
+                        if ( promotion instanceof ProductsPromotion ) {
+                            promotions.add(new SimpleProductsPromotion((ProductsPromotion) promotion));
+                        }
+                        else {
+                            promotions.add(promotion);
+                        }
+                    }
+                    promotionsWidget.setPromotions(promotions);
+                }
+            }
+        }
+        catch ( ContentProviderException e ) {
+            LOG.error("Could not enrich model.", e);
+        }
+        return model;
+    }
+    
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SDL.ECommerce.Api.Model
+﻿namespace SDL.ECommerce.Api.Model
 {
     /// <summary>
     /// Category Reference interface

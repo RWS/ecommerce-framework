@@ -55,9 +55,11 @@ public class HybrisCart implements Cart {
 
     @Override
     public String getId() throws ECommerceException {
-        return this.cart.getCode();
+        return this.sessionId;
+        //return this.cart.getCode();
     }
 
+    // TODO: Remove session ID
     @Override
     public String getSessionId() {
         return this.sessionId;

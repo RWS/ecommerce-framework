@@ -1,6 +1,4 @@
-﻿@using SDL.ECommerce.Api.Model
-@using SDL.ECommerce.DXA
-@model IProductsPromotion
+﻿@model IProductsPromotion
 <div>
     <div class="row">
         <h3 class="promotion-title"><i class="fa fa-arrow-circle-right"></i> @Model.Title @Html.Partial("Partials/EditControl", Model)</h3>
@@ -9,7 +7,7 @@
         @foreach (var product in Model.Products)
         {
         <div class="col-sm-6 col-md-3 product-promo">
-            <a href="@ECommerceContext.LinkResolver.GetProductDetailLink(product)" class="product-teaser-link">
+            <a href="@LinkResolver.Instance.GetProductDetailLink(product)" class="product-teaser-link">
                 <div class="teaser">
                     <img src="@product.ThumbnailUrl" class="teaser-img loader-img" />
                     <div class="product-promo-ribbon">

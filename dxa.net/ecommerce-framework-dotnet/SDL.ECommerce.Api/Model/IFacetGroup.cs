@@ -21,7 +21,7 @@ namespace SDL.ECommerce.Api.Model
         /// Title of the facet group. Should be localized to current language.
         /// </summary>
         /// <returns></returns>
-        String Title { get; }
+        string Title { get; }
 
         /// <summary>
         ///  Get all belonging facets
@@ -34,5 +34,10 @@ namespace SDL.ECommerce.Api.Model
         /// </summary>
         /// <returns></returns>
         bool IsCategory { get; }
+
+        /// <summary>
+        /// Associated attributes to control presentation of facets etc.
+        /// </summary>
+        ICollection<NameValue> Attributes { get; }
     }
 }

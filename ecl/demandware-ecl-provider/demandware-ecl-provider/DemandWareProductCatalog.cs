@@ -45,8 +45,11 @@ namespace SDL.DemandWare.Ecl
 
         public QueryResult Search(string searchTerm, string categoryId, int publicationId, int pageIndex)
         {
-            // TODO: Add support for search
-            throw new NotSupportedException();
+            List<DemandWareProduct> list = (List<DemandWareProduct>)this.shopClient.Search(searchTerm, categoryId, 100);
+            var result = new QueryResult();
+            result.NumberOfPages = 1; // TODO: Add support for pagination here
+            result.Products = list.ConvertAll(x => (Product)x);
+            return result;
         }
 
         public Product GetProduct(string id, int publicationId)

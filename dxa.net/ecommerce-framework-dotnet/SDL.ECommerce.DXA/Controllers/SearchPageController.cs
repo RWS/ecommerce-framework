@@ -1,11 +1,9 @@
 ﻿using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
-using SDL.ECommerce.Api.Model;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
+using SDL.ECommerce.Api;
+using SDL.ECommerce.DXA.Factories;
 
 namespace SDL.ECommerce.DXA.Controllers
 {
@@ -14,11 +12,18 @@ namespace SDL.ECommerce.DXA.Controllers
     /// </summary>
     public class SearchPageController : AbstractECommercePageController
     {
+        private readonly IECommerceLinkResolver _linkResolver;
+
+        public SearchPageController()
+        {
+            _linkResolver = DependencyFactory.Current.Resolve<IECommerceLinkResolver>();
+        }
+
         /// <summary>
         /// Search triggered by the search box
         /// </summary>
         /// <returns></returns>
-        public ActionResult Search()
+        public virtual ActionResult Search()
         {
             var searchPhrase = HttpContext.Request.QueryString["q"];
             return Redirect(ECommerceContext.LocalizePath("/search/") + searchPhrase);
@@ -30,7 +35,7 @@ namespace SDL.ECommerce.DXA.Controllers
         /// <param name="searchPhrase"></param>
         /// <param name="categoryUrl"></param>
         /// <returns></returns>
-        public ActionResult SearchCategoryPage(string searchPhrase, string categoryUrl)
+        public virtual ActionResult SearchCategoryPage(string searchPhrase, string categoryUrl)
         {
             Log.Info("Entering search page controller with search phrase: " + searchPhrase + ", category: "  + categoryUrl);
 
@@ -70,7 +75,7 @@ namespace SDL.ECommerce.DXA.Controllers
 
             if (searchResult.RedirectLocation != null)
             {
-                return Redirect(ECommerceContext.LinkResolver.GetLocationLink(searchResult.RedirectLocation));
+                return Redirect(_linkResolver.GetLocationLink(searchResult.RedirectLocation));
             }
 
             ECommerceContext.Set(ECommerceContext.CURRENT_QUERY, query);

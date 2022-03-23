@@ -3,14 +3,14 @@
 
     <groupId>com.sdl</groupId>
     <artifactId>ecommerce-framework-example-webapp</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <packaging>war</packaging>
     <description>Example web application for the E-Commerce Framework</description>
 
     <properties>
         <java-version>1.8</java-version>
-        <dxa.version>1.6.0</dxa.version>
-        <dxa-release-branch>release/1.6</dxa-release-branch>
+        <dxa.version>1.7.0</dxa.version>
+        <dxa-release-branch>release/1.7</dxa-release-branch>
         <java-version>1.8</java-version>
         <build.classifier>web8</build.classifier>
         <ecommerce-fw.version>1.1.0</ecommerce-fw.version>

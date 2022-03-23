@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using SDL.ECommerce.Api.Model;
+using System.Linq;
 
 namespace SDL.ECommerce.OData
 {
@@ -17,15 +16,15 @@ namespace SDL.ECommerce.OData
             }
         }
 
-        /***** METHODS NOT AVAILABLE FOR PRODUCT SUMMARY ONLY IN DETAIL PRODUCT INFO ******/
-
-        public IDictionary<string, object> Attributes
+        IList<IProductAttribute> IProduct.Attributes
         {
             get
             {
-                throw new NotImplementedException();
+                return this.Attributes.Cast<IProductAttribute>().ToList();
             }
         }
+
+        /***** METHODS NOT AVAILABLE FOR PRODUCT SUMMARY ONLY IN DETAIL PRODUCT INFO ******/
 
         public string Description
         {
@@ -75,7 +74,7 @@ namespace SDL.ECommerce.OData
             }
         }
 
-        public IList<IProductVariantAttribute> VariantAttributes
+        public IList<IProductAttribute> VariantAttributes
         {
             get
             {
@@ -84,6 +83,14 @@ namespace SDL.ECommerce.OData
         }
 
         public IList<IProductVariantAttributeType> VariantAttributeTypes
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public VariantLinkType VariantLinkType
         {
             get
             {

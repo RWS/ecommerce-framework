@@ -48,7 +48,10 @@ namespace SDL.ECommerce.Ecl
 
         public override string GetDirectLinkToPublished(IList<ITemplateAttribute> attributes)
         {
-            return this.category.CategoryId;
+            // Return a E-Com FW specific URI to the category. This can be used to resolve to
+            // concrete site URLs to category pages (for example via an custom RTF processor).
+            //
+            return "ecom:category:" + this.category.CategoryId + ":uri";
         }
 
         public override string GetTemplateFragment(IList<ITemplateAttribute> attributes)

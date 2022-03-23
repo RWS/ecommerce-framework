@@ -6,6 +6,7 @@
 <jsp:useBean id="markup" type="com.sdl.webapp.common.markup.Markup" scope="request"/>
 <jsp:useBean id="screenWidth" type="com.sdl.webapp.common.api.ScreenWidth" scope="request"/>
 <jsp:useBean id="linkResolver" type="com.sdl.ecommerce.api.ECommerceLinkResolver" scope="request"/>
+<jsp:useBean id="localization" type="com.sdl.webapp.common.api.localization.Localization" scope="request"/>
 
 <div class="content" style="margin-bottom: 8px;">
     <div class="row">
@@ -53,6 +54,9 @@
                     </div>
 
                     <c:if test="${entity.product.variantAttributeTypes != null}">
+                        <%
+                            boolean isPrimaryVariant = true; // TODO: WHY DO I NEED THIS????
+                        %>
                        <c:forEach var="variantAttributeType" items="${entity.product.variantAttributeTypes}">
                            <h4>${variantAttributeType.name}</h4>
                            <c:forEach var="valueType" items="${variantAttributeType.values}">
@@ -69,12 +73,57 @@
 
                 </div>
                 <div class="product-add-to-cart">
-                    <a class="btn btn-primary add-to-cart-button" data-product-id="${entity.product.variantId != null ? entity.product.variantId : entity.product.id}"><dxa:resource key="e-commerce.addToCartLabel"/> <i
+                    <a class="btn btn-primary add-to-cart-button <c:if test="${entity.product.variantId == null && entity.product.masterId != null}">disabled</c:if>"  data-localization-prefix="${localization.localizePath('/')}" data-product-id="${entity.product.variantId != null ? entity.product.variantId : entity.product.id}"><dxa:resource key="e-commerce.addToCartLabel"/> <i
                             class="fa fa-cart-plus"></i></a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+<!-- .NET CODE
+
+
+The algorithm to get isPrimaryVariant seems to be not solid
+
+
+@if (Model.Product.VariantAttributeTypes != null)
+{
+bool isPrimaryVariant = true;
+foreach (var variantAttributeType in Model.Product.VariantAttributeTypes)
+{
+<h4>@variantAttributeType.Name</h4>
+foreach (var valueType in variantAttributeType.Values)
+{
+if (valueType.IsAvailable)
+{
+<a class="btn @(valueType.IsSelected ? "btn-info disabled" : "btn-default")" style="margin-bottom: 4px;"
+href="@ECommerceContext.LinkResolver.GetProductDetailVariantLink(Model.Product, variantAttributeType.Id, valueType.Id, isPrimaryVariant)">
+@valueType.Value
+</a>
+}
+}
+isPrimaryVariant = false;
+}
+}
+
+<h3 class="center-block" style="margin-top: 16px;">
+    @Model.Product.Price.FormattedPrice
+</h3>
+<div class="product-add-to-cart">
+    <a class="btn btn-primary add-to-cart-button  @(Model.Product.VariantId == null && Model.Product.MasterId != null ? "disabled" : "")" data-product-id="@(Model.Product.VariantId != null ? Model.Product.VariantId : Model.Product.Id)">
+    @Html.Resource("e-commerce.addToCartLabel") <i class="fa fa-cart-plus"></i>
+    </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+-->
 
 

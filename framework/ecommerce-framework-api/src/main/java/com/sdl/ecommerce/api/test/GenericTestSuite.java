@@ -184,8 +184,18 @@ public abstract class GenericTestSuite {
         this.printBreadcrumbs(result.getBreadcrumbs());
         this.printPromotions(result.getPromotions());
         LOG.info("Attributes: ");
-        for (String attrName : product.getAttributes().keySet()) {
-            LOG.info("Name: " + attrName + " Value: " + product.getAttributes().get(attrName));
+        for (ProductAttribute attribute : product.getAttributes()) {
+            if ( attribute.isSingleValue() ) {
+                if ( attribute.getValues().size() > 0 ) {
+                    LOG.info("Name: " + attribute.getName() + " Value: " + attribute.getValues().get(0).getPresentationValue());
+                }
+            }
+            else {
+                LOG.info("Name: " + attribute.getName() + " Values: ");
+                for ( ProductAttributeValue value : attribute.getValues() ) {
+                    LOG.info("  " + value.getPresentationValue());
+                }
+            }
         }
 
     }
@@ -213,28 +223,28 @@ public abstract class GenericTestSuite {
         LOG.info("Product Description: " + product.getDescription());
         if ( product.getVariantAttributes() != null ) {
             LOG.info("Current product is an variant with current attributes:");
-            for ( ProductVariantAttribute attribute : product.getVariantAttributes() ) {
-                LOG.info("  " + attribute.getName() + " = " + attribute.getValue());
+            for ( ProductAttribute attribute : product.getVariantAttributes() ) {
+                LOG.info("  " + attribute.getName() + " = " + attribute.getValues().get(0).getPresentationValue());
             }
         }
         if ( product.getVariants() != null ) {
             LOG.info("Variants: ");
             for (ProductVariant variant : product.getVariants()) {
-                LOG.info("  Product Variant ID:" + variant.getId());
-                LOG.info("  Price:" + variant.getPrice());
+                LOG.info("  Product Variant ID: " + variant.getId());
+                LOG.info("  Price: " + variant.getPrice().getFormattedPrice());
                 LOG.info("  Attributes:");
-                for (ProductVariantAttribute attribute : variant.getAttributes()) {
-                    LOG.info("    " + attribute.getName() + " = " + attribute.getValue());
+                for (ProductAttribute attribute : variant.getAttributes()) {
+                    LOG.info("    " + attribute.getName() + " = " + attribute.getValues().get(0).getPresentationValue());
                 }
             }
         }
         else if ( product.getVariantAttributes() != null ) {
             LOG.info("Variant attributes: ");
-            for ( ProductVariantAttribute attribute : product.getVariantAttributes() ) {
+            for ( ProductAttribute attribute : product.getVariantAttributes() ) {
                 LOG.info("  Attribute ID: " + attribute.getId());
                 LOG.info("  Attribute Name: " + attribute.getName());
-                LOG.info("  Attribute Value ID: " + attribute.getValueId());
-                LOG.info("  Attribute Value: " + attribute.getValue());
+                LOG.info("  Attribute Value: " + attribute.getValues().get(0).getValue());
+                LOG.info("  Attribute Presentation Value: " + attribute.getValues().get(0).getValue());
                 LOG.info("      ---");
             }
         }

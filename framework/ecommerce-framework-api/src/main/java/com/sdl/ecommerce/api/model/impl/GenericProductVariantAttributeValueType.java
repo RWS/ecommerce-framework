@@ -3,7 +3,7 @@ package com.sdl.ecommerce.api.model.impl;
 import com.sdl.ecommerce.api.model.ProductVariantAttributeValueType;
 
 /**
- * GenericProductVariantAttributeValueType
+ * Generic implementation of the ProductVariantAttributeValueType interface
  *
  * @author nic
  */
@@ -12,11 +12,20 @@ public class GenericProductVariantAttributeValueType implements ProductVariantAt
     private String id;
     private String value;
     private boolean isSelected;
+    private boolean isApplicable;
 
-    public GenericProductVariantAttributeValueType(String id, String value, boolean isSelected) {
+    /**
+     * Constructor
+     * @param id
+     * @param value
+     * @param isSelected
+     * @param isApplicable
+     */
+    public GenericProductVariantAttributeValueType(String id, String value, boolean isSelected, boolean isApplicable) {
         this.id = id;
         this.value = value;
         this.isSelected = isSelected;
+        this.isApplicable = isApplicable;
     }
 
     @Override
@@ -32,5 +41,10 @@ public class GenericProductVariantAttributeValueType implements ProductVariantAt
     @Override
     public boolean isSelected() {
         return isSelected;
+    }
+
+    @Override
+    public boolean isApplicable() {
+        return isApplicable;
     }
 }

@@ -25,7 +25,9 @@ public class DemandwareShopClientImpl implements DemandwareShopClient {
 
     static private Logger log = LoggerFactory.getLogger(DemandwareShopClientImpl.class);
 
-    static final String BASE_URL_PATH = "/dw/shop/v16_8";
+    // TODO: Update to 17.7 - Needs to update the cart implementation
+
+    static final String BASE_URL_PATH = "/dw/shop/v16_4";
 
     private String shopUrl;
     private String clientId;
@@ -408,6 +410,8 @@ public class DemandwareShopClientImpl implements DemandwareShopClient {
         }
     }
 
+
+    // TODO: Use this API instead: /search_suggestion ????
     /**
      * Search products by category
      * @param categoryId

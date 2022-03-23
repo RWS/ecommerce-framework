@@ -1,9 +1,7 @@
 ﻿using SDL.ECommerce.Api.Model;
-using System;
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SDL.ECommerce.OData
 {
@@ -17,11 +15,11 @@ namespace SDL.ECommerce.OData
             }
         }
 
-        IList<IProductVariantAttribute> IProductVariant.Attributes
+        IList<IProductAttribute> IProductVariant.Attributes
         {
             get
             {
-                return this.Attributes.Cast<IProductVariantAttribute>().ToList();
+                return this.Attributes.Cast<IProductAttribute>().ToList();
             }
         }
 

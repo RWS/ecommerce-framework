@@ -30,7 +30,7 @@
 
 %>
 <li class="mega-nav-link">
-    <a href="${linkResolver.getCategoryLink(entity.categoryReference.category)}">${entity.categoryReference.category.name}</a>
+    <a href="${entity.categoryReference.categoryUrl}">${entity.categoryReference.category.name}</a>
     <div class="mega-nav" style="width: ${navWidth}px;">
         <div class="row">
             <div class="col-sm-12">

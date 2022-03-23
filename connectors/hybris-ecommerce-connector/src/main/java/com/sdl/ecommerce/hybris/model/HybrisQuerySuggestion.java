@@ -30,4 +30,9 @@ public class HybrisQuerySuggestion implements QuerySuggestion {
     public String getSuggestion() {
         return this.suggestion;
     }
+
+    @Override
+    public Integer getEstimatedResults() {
+        return null;
+    }
 }

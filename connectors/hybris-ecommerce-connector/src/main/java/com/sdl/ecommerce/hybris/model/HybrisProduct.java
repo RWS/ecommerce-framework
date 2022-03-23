@@ -1,6 +1,8 @@
 package com.sdl.ecommerce.hybris.model;
 
 import com.sdl.ecommerce.api.model.*;
+import com.sdl.ecommerce.api.model.impl.GenericProductAttribute;
+import com.sdl.ecommerce.api.model.impl.GenericProductAttributeValue;
 import com.sdl.ecommerce.hybris.api.model.Image;
 
 import java.util.ArrayList;
@@ -28,6 +30,16 @@ public class HybrisProduct implements Product {
     @Override
     public String getId() {
         return this.hybrisProduct.getCode();
+    }
+
+    @Override
+    public String getMasterId() {
+        return null;
+    }
+
+    @Override
+    public VariantLinkType getVariantLinkType() {
+        return VariantLinkType.VARIANT_ID;
     }
 
     @Override
@@ -88,8 +100,19 @@ public class HybrisProduct implements Product {
     }
 
     @Override
-    public Map<String, Object> getAttributes() {
-        return this.hybrisProduct.getAdditionalProperties();
+    public List<ProductAttribute> getAttributes() {
+        List<ProductAttribute> attributeList = new ArrayList<>();
+        Map<String,Object> hybrisAttributes = this.hybrisProduct.getAdditionalProperties();
+        for ( String attributeName : hybrisAttributes.keySet() ) {
+            String attributeValue = hybrisAttributes.get(attributeName).toString();
+
+            // Right now we use the name for both ID & name
+            //
+            ProductAttribute attribute = new GenericProductAttribute(attributeName, attributeName,
+                    new GenericProductAttributeValue(attributeValue));
+            attributeList.add(attribute);
+        }
+        return attributeList;
     }
 
     @Override
@@ -98,7 +121,7 @@ public class HybrisProduct implements Product {
     }
 
     @Override
-    public List<ProductVariantAttribute> getVariantAttributes() {
+    public List<ProductAttribute> getVariantAttributes() {
         return null;
     }
 

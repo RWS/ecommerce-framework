@@ -1,11 +1,9 @@
 ﻿using Sdl.Web.Delivery.Service;
 using SDL.ECommerce.Api.Model;
 using SDL.ECommerce.Api.Service;
-using System;
-using System.Collections.Generic;
+
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SDL.ECommerce.OData
 {
@@ -14,15 +12,15 @@ namespace SDL.ECommerce.OData
     /// </summary>
     public class ProductQueryService : IProductQueryService
     {
-        private ODataV4Service service;
+        private ECommerceClient ecommerceClient;
 
         /// <summary>
         /// Constructor (only available internally)
         /// </summary>
         /// <param name="service"></param>
-        internal ProductQueryService(ODataV4Service service)
+        internal ProductQueryService(ECommerceClient ecommerceClient)
         {
-            this.service = service;
+            this.ecommerceClient = ecommerceClient;
         }
 
         /// <summary>
@@ -82,7 +80,7 @@ namespace SDL.ECommerce.OData
                 func.WithParam("viewType", query.ViewType.ToString());
             }
 
-            return Enumerable.FirstOrDefault<ProductQueryResult>(this.service.Execute<ProductQueryResult>(func));
+            return Enumerable.FirstOrDefault<ProductQueryResult>(this.ecommerceClient.ODataV4Service.Execute<ProductQueryResult>(func));
 
             /*
             var uriString = string.Format("{0}/{1}", (object)this.service.Service.BaseUri, (object)func);

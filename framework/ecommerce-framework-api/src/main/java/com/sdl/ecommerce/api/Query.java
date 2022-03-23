@@ -4,7 +4,9 @@ import com.sdl.ecommerce.api.model.Category;
 import com.sdl.ecommerce.api.model.FacetParameter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Query
@@ -16,12 +18,14 @@ import java.util.List;
 public abstract class Query implements Cloneable {
 
     private Category category;
+    private List<Category> categories;
     private String searchPhrase;
     private List<FacetParameter> facets;
     private int startIndex;
     private int viewSize;
     private List<QueryFilterAttribute> filterAttributes;
     private ViewType viewType;
+    private Map<String,String> contextData;
 
     // TODO: Add support for sorting
     // TODO: Should this also be an interface???
@@ -33,6 +37,16 @@ public abstract class Query implements Cloneable {
      */
     public Query category(Category category) {
         this.category = category;
+        return this;
+    }
+
+    /**
+     * Set a list of categories (OR statement)
+     * @param categories
+     * @return this
+     */
+    public Query categories(List<Category> categories) {
+        this.categories = categories;
         return this;
     }
 
@@ -52,7 +66,12 @@ public abstract class Query implements Cloneable {
      * @return this
      */
     public Query facets(List<FacetParameter> facets) {
-        this.facets = facets;
+        if ( this.facets == null ) {
+            this.facets = facets;
+        }
+        else {
+            this.facets.addAll(facets);
+        }
         return this;
     }
 
@@ -92,7 +111,7 @@ public abstract class Query implements Cloneable {
     /**
      * Add a filter attribute to control what information that should be included or excluded.
      * @param filterAttribute
-     * @return  this
+     * @return this
      */
     public Query filterAttribute(QueryFilterAttribute filterAttribute) {
         if ( this.filterAttributes == null ) {
@@ -113,10 +132,44 @@ public abstract class Query implements Cloneable {
     }
 
     /**
+     * Set context data
+     * @param name
+     * @param value
+     * @return this
+     */
+    public Query contextData(String name, String value) {
+        if (this.contextData == null) {
+            this.contextData = new HashMap<>();
+        }
+        this.contextData.put(name, value);
+        return this;
+    }
+
+    /**
+     * Set context data
+     * @param contextData
+     * @return this
+     */
+    public Query contextData(Map<String,String> contextData) {
+        if (this.contextData == null) {
+            this.contextData = new HashMap<>();
+        }
+        this.contextData.putAll(contextData);
+        return this;
+    }
+
+    /**
      * @return category
      */
     public Category getCategory() {
         return category;
+    }
+
+    /**
+     * @return categories
+     */
+    public List<Category> getCategories() {
+        return categories;
     }
 
     /**
@@ -159,6 +212,13 @@ public abstract class Query implements Cloneable {
      */
     public ViewType getViewType() {
         return viewType;
+    }
+
+    /**
+     * @return context data
+     */
+    public Map<String, String> getContextData() {
+        return contextData;
     }
 
     /**

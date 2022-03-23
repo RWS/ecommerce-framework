@@ -4,22 +4,35 @@ using Sdl.Web.Common.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Mvc;
+using SDL.ECommerce.DXA.Factories;
 using SDL.ECommerce.DXA.Models;
 using SDL.ECommerce.Api;
-using Sdl.Web.Mvc.Configuration;
 using SDL.ECommerce.Api.Model;
+using Sdl.Web.Mvc.Configuration;
 using System.Runtime.Caching;
+using System.Web.Configuration;
 
-namespace SDL.ECommerce.DXA.Controller
+namespace SDL.ECommerce.DXA.Controllers
 {
     /// <summary>
     /// Base Controller for E-Commerce widgets such as listers, facets, breadcrumbs etc
     /// </summary>
     public abstract class BaseEComWidgetController : BaseController
     {
+        // Temporary solution until OData has full support for DXA caching
+        //
+        private string _clientType =  WebConfigurationManager.AppSettings["ecommerce-service-client-type"] ?? "odata";
+
+        private IECommerceClient _eCommerceClient;
+
+        protected BaseEComWidgetController()
+        {
+            LinkResolver = DependencyFactory.Current.Resolve<IECommerceLinkResolver>();
+            _eCommerceClient = DependencyFactory.Current.Resolve<IECommerceClient>();
+        }
+
+        protected IECommerceLinkResolver LinkResolver { get; }
 
         /// <summary>
         /// Product Detail
@@ -27,7 +40,7 @@ namespace SDL.ECommerce.DXA.Controller
         /// <param name="entity"></param>
         /// <param name="containerSize"></param>
         /// <returns></returns>
-        public ActionResult ProductDetail(EntityModel entity, int containerSize = 0)
+        public virtual ActionResult ProductDetail(EntityModel entity, int containerSize = 0)
         {
             SetupViewData(entity, containerSize);
 
@@ -67,7 +80,7 @@ namespace SDL.ECommerce.DXA.Controller
         /// <param name="entity"></param>
         /// <param name="containerSize"></param>
         /// <returns></returns>
-        public ActionResult ProductDetailEclItem(EntityModel entity, int containerSize = 0)
+        public virtual ActionResult ProductDetailEclItem(EntityModel entity, int containerSize = 0)
         {
             SetupViewData(entity, containerSize);
 
@@ -83,16 +96,38 @@ namespace SDL.ECommerce.DXA.Controller
         /// <param name="entity"></param>
         /// <param name="containerSize"></param>
         /// <returns></returns>
-        public ActionResult ProductLister(EntityModel entity, int containerSize = 0)
+        public virtual ActionResult ProductLister(EntityModel entity, int containerSize = 0)
         {
             SetupViewData(entity, containerSize);
 
             ProductListerWidget widget = (ProductListerWidget) entity;
             IProductQueryResult queryResult = null;
-            if ( widget.CategoryReference != null )
+
+            if (widget.CategoryReferences?.Any() ?? false)
             {
-                var category = ResolveCategory(widget.CategoryReference);
-                queryResult = ECommerceContext.Client.QueryService.Query(new Api.Model.Query { Category = category });
+                var query = new Api.Model.Query
+                {
+                    ViewSize = widget.ViewSize,
+                    CategoryIds = new List<string>()
+                };
+
+                if (widget.CategoryReferences.Count == 1)
+                {
+                    query.CategoryId = ResolveCategoryId(widget.CategoryReferences.First());
+                }
+                else
+                {
+                    foreach (var eCommerceCategoryReference in widget.CategoryReferences)
+                    {
+                        query.CategoryIds.Add(ResolveCategoryId(eCommerceCategoryReference));
+                    }
+                }
+                if (widget.ContextData != null)
+                {
+                    query.ContextData = widget.ContextData.ToDictionary(c => c.Name, c => c.Value);
+                }
+
+                queryResult = _eCommerceClient.QueryService.Query(query);
             }
             else
             {
@@ -105,8 +140,19 @@ namespace SDL.ECommerce.DXA.Controller
                 queryResult = GetResultFromPageTemplate();
             }
 
-            widget.Items = queryResult.Products.ToList();
-            this.ProcessListerNavigationLinks(widget, queryResult, (IList<FacetParameter>) ECommerceContext.Get(ECommerceContext.FACETS));
+            if (queryResult != null)
+            {
+                widget.Items = queryResult.Products?.ToList();
+                this.ProcessListerNavigationLinks(widget, queryResult, (IList<FacetParameter>)ECommerceContext.Get(ECommerceContext.FACETS));
+            }
+            else
+            {
+                widget.Items = new List<IProduct>();
+                widget.NavigationData = new ListerNavigationData
+                {
+                    ShowNavigation = false
+                };
+            }
 
             return View(entity.MvcData.ViewName, entity);
         }
@@ -117,7 +163,7 @@ namespace SDL.ECommerce.DXA.Controller
         /// <param name="entity"></param>
         /// <param name="containerSize"></param>
         /// <returns></returns>
-        public ActionResult Facets(EntityModel entity, int containerSize = 0)
+        public virtual ActionResult Facets(EntityModel entity, int containerSize = 0)
         {
             SetupViewData(entity, containerSize);
             FacetsWidget widget = (FacetsWidget) entity;
@@ -151,17 +197,19 @@ namespace SDL.ECommerce.DXA.Controller
         /// <param name="entity"></param>
         /// <param name="containerSize"></param>
         /// <returns></returns>
-        public ActionResult FlyoutFacets(EntityModel entity, int containerSize = 0)
+        public virtual ActionResult FlyoutFacets(EntityModel entity, int containerSize = 0)
         {
             SetupViewData(entity, containerSize);
             FacetsWidget widget = (FacetsWidget)entity;
+
+            bool useDxaCaching = _clientType.Equals("rest");
 
             if ( widget.CategoryReference != null )
             {
                 widget.CategoryReference.Category = ResolveCategory(widget.CategoryReference);
                 if (widget.CategoryReference.Category != null)
                 {
-                    var cachedData = this.GetCachedFlyoutData(widget.CategoryReference.Category.Id);
+                    var cachedData = useDxaCaching ? null : this.GetCachedFlyoutData(widget.CategoryReference.Category.Id, WebRequestContext.Localization.Id);
                     if (cachedData == null)
                     {
                         var queryResult = ECommerceContext.Client.QueryService.Query(
@@ -171,15 +219,28 @@ namespace SDL.ECommerce.DXA.Controller
                                 ViewType = Api.Model.ViewType.FLYOUT
                             });
 
-                        cachedData = new FlyoutData
+                        // Tempory workaround
+                        if (!useDxaCaching)
                         {
-                            FacetGroups = queryResult.FacetGroups.ToList(),
-                            Promotions = queryResult.Promotions.ToList()
-                        };
-                        this.CacheFlyoutData(widget.CategoryReference.Category.Id, cachedData);
+                            cachedData = new FlyoutData
+                            {
+                                FacetGroups = queryResult.FacetGroups.ToList(),
+                                Promotions = queryResult.Promotions.ToList()
+                            };
+                            this.CacheFlyoutData(widget.CategoryReference.Category.Id, WebRequestContext.Localization.Id, cachedData);
+                        }
+                        else
+                        {
+                            widget.FacetGroups = queryResult.FacetGroups.ToList();
+                            widget.RelatedPromotions = queryResult.Promotions.ToList();
+                        }
                     }
-                    widget.FacetGroups = cachedData.FacetGroups;
-                    widget.RelatedPromotions = cachedData.Promotions;
+                    // Temporary workaround
+                    if (!useDxaCaching)
+                    {
+                        widget.FacetGroups = cachedData.FacetGroups;
+                        widget.RelatedPromotions = cachedData.Promotions;
+                    }
                 }
             }
             
@@ -192,7 +253,7 @@ namespace SDL.ECommerce.DXA.Controller
         /// <param name="entity"></param>
         /// <param name="containerSize"></param>
         /// <returns></returns>
-        public ActionResult Promotions(EntityModel entity, int containerSize = 0)
+        public virtual ActionResult Promotions(EntityModel entity, int containerSize = 0)
         {
             SetupViewData(entity, containerSize);
             PromotionsWidget widget = (PromotionsWidget)entity;
@@ -247,7 +308,7 @@ namespace SDL.ECommerce.DXA.Controller
         /// <param name="entity"></param>
         /// <param name="containerSize"></param>
         /// <returns></returns>
-        public ActionResult Breadcrumb(EntityModel entity, int containerSize = 0)
+        public virtual ActionResult Breadcrumb(EntityModel entity, int containerSize = 0)
         {
             SetupViewData(entity, containerSize);
             BreadcrumbWidget widget = (BreadcrumbWidget)entity;
@@ -297,7 +358,7 @@ namespace SDL.ECommerce.DXA.Controller
         /// <param name="entity"></param>
         /// <param name="containerSize"></param>
         /// <returns></returns>
-        public ActionResult SearchFeedback(EntityModel entity, int containerSize = 0)
+        public virtual ActionResult SearchFeedback(EntityModel entity, int containerSize = 0)
         {
             SetupViewData(entity, containerSize);
             SearchFeedbackWidget widget = (SearchFeedbackWidget)entity;
@@ -316,7 +377,7 @@ namespace SDL.ECommerce.DXA.Controller
         /// <param name="entity"></param>
         /// <param name="containerSize"></param>
         /// <returns></returns>
-        public ActionResult Cart(EntityModel entity, int containerSize = 0)
+        public virtual ActionResult Cart(EntityModel entity, int containerSize = 0)
         {
             SetupViewData(entity, containerSize);
             CartWidget widget = (CartWidget)entity;
@@ -334,17 +395,42 @@ namespace SDL.ECommerce.DXA.Controller
             ICategory category = null;
             if ( categoryReference.CategoryPath != null )
             {
-                category = ECommerceContext.Client.CategoryService.GetCategoryByPath(categoryReference.CategoryPath);
+                category = _eCommerceClient.CategoryService.GetCategoryByPath(categoryReference.CategoryPath);
             }
             else if ( categoryReference.CategoryId != null )
             {
-                category = ECommerceContext.Client.CategoryService.GetCategoryById(categoryReference.CategoryId);
+                category = _eCommerceClient.CategoryService.GetCategoryById(categoryReference.CategoryId);
             }
             else if ( categoryReference.CategoryRef != null )
             {
-                category = ECommerceContext.Client.CategoryService.GetCategoryById(categoryReference.CategoryRef.ExternalId);
+                category = _eCommerceClient.CategoryService.GetCategoryById(categoryReference.CategoryRef.ExternalId);
             }
             return category;
+        }
+
+        /// <summary>
+        /// Resolve category id via a CMS category reference
+        /// </summary>
+        /// <param name="categoryReference"></param>
+        /// <returns></returns>
+        protected string ResolveCategoryId(ECommerceCategoryReference categoryReference)
+        {
+            if (categoryReference?.CategoryId != null)
+            {
+                return categoryReference.CategoryId;
+            }
+
+            if (categoryReference?.CategoryRef != null)
+            {
+                return categoryReference.CategoryRef.ExternalId;
+            }
+
+            if (categoryReference?.CategoryPath != null)
+            {
+                return _eCommerceClient.CategoryService.GetCategoryByPath(categoryReference.CategoryPath)?.Id;
+            }
+
+            return null;
         }
 
         protected IProductQueryResult GetResultFromPageTemplate()
@@ -398,7 +484,10 @@ namespace SDL.ECommerce.DXA.Controller
             int startIndex = result.StartIndex;
             int currentSet = result.CurrentSet;
 
-            lister.NavigationData = new ListerNavigationData();
+            lister.NavigationData = new ListerNavigationData 
+            {
+                TotalCount = totalCount
+            };
 
             int viewSets = 1;
             if (totalCount > viewSize)
@@ -419,7 +508,7 @@ namespace SDL.ECommerce.DXA.Controller
                 {
                     nextStartIndex = startIndex + viewSize;
                 }
-                string baseUrl = ECommerceContext.LinkResolver.GetFacetLink(facets);
+                string baseUrl = LinkResolver.GetFacetLink(facets);
                 if ( String.IsNullOrEmpty(baseUrl) )
                 {
                     baseUrl += "?";
@@ -455,16 +544,16 @@ namespace SDL.ECommerce.DXA.Controller
 
         }
 
-        private FlyoutData GetCachedFlyoutData(string categoryId)
+        private FlyoutData GetCachedFlyoutData(string categoryId, string LocalizationId)
         {
-            return this.flyoutCache[categoryId] as FlyoutData;
+            return this.flyoutCache[string.Concat(categoryId, "-", LocalizationId)] as FlyoutData;
         }
 
-        private void CacheFlyoutData(string categoryId, FlyoutData flyoutData)
+        private void CacheFlyoutData(string categoryId, string LocalizationId, FlyoutData flyoutData)
         {
             // Default cache flyout data in 1 hour. TODO: Have this configurable
             //
-            this.flyoutCache.Add(categoryId, flyoutData, DateTimeOffset.Now.AddHours(1.0));
+            this.flyoutCache.Add(string.Concat(categoryId, "-", LocalizationId), flyoutData, DateTimeOffset.Now.AddHours(1.0));
         }
 
         private ObjectCache flyoutCache = MemoryCache.Default;

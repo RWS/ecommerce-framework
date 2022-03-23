@@ -13,7 +13,7 @@
     <groupId>com.sdl</groupId>
     <artifactId>ecommerce-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 
     <licenses>
         <license>
@@ -47,10 +47,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java-version>1.7</java-version>
+        <java-version>1.8</java-version>
 
-        <dxa.version>1.6.0</dxa.version>
-        <dxa-release-branch>1.6</dxa-release-branch>
+        <dxa.version>1.7.0</dxa.version>
+        <dxa-release-branch>1.7</dxa-release-branch>
 
         <!-- Servlet and JSP APIs -->
         <servlet-api-version>3.1.0</servlet-api-version>
@@ -62,6 +62,9 @@
 
         <!-- Jackson and related libraries -->
         <jackson-version>2.4.3</jackson-version>
+        <!-- TODO: Update to later version of Jackson to avoid vulnability issues
+        <jackson-version>2.8.11.1</jackson-version>
+        -->
 
         <!-- SDL OData -->
         <odata.version>2.1.1</odata.version>

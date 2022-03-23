@@ -1,26 +1,33 @@
-SDL Web E-Commerce Framework v1.1
-====================================
+Tridion Sites E-Commerce Framework v1.2
+=========================================
 
-This is a framework to enable E-Commerce functionality for SDL Web.
+This is a framework to enable E-Commerce functionality for Tridion Sites.
 It contains ECL providers and DXA modules for various E-Commerce systems.
 
-Right now it provides connectors for:
+The framework provides connectors for:
 
 * Fredhopper (http://www.fredhopper.com)
-* SAP Hybris (http://www.hybris.com)
-* Salesforce Commerce Cloud (Demandware) (http://www.demandware.com)
+* SAP Hybris (http://www.hybris.com) (deprecated)
+* Salesforce Commerce Cloud (Demandware) (http://www.demandware.com) (deprecated)
 
-The framework has been verified both on SDL Tridion 2013 SP1 and SDL Web 8 (8.1.1) using DXA 1.6.
+The framework has been verified on Tridion Sites 9.1/9.5 and DXA.Net 2.2 and DXA.Java 1.7.
 
-New functionality in the v1.1 version:
-* New OData based micro service for E-Commerce including clients for Java and .NET
-* Decoupled E-Commerce connectors, either they can be plugged into the micro service or they can be co-located in DXA (java only)
-* DXA modules for .NET providing the same functionality as the Java DXA modules
-* Support for product variants
-* ECL connector for Fredhopper
-* Support for latest Demandware version (v16.8)
-* Separation of DXA module into two parts: one generic (controllers & models) and one example module (example HTML views)
-* Supports DXA 1.6
+New functionality in the v1.2 version:
+* Improved support for product variants
+* Pluggable variant builders for the Fredhopper connector
+* REST based service (as alternative to the OData service)
+* Experimental support for Graph-QL
+* Support for DXA caching of E-Commerce data using MemCache, REDIS etc
+* Demandware ECL connector now supports search
+* Processing of category and product links in RTF fields
+* Support for querying several categories (OR)
+
+
+Disclaimer
+-----------
+This project is not further developed.
+However there are more feature-rich integrations with E-Commerce systems like SAP Commerce Cloud and Adobe Magento available (based on the Tridion Integration Framework). Please reach out to RWS for more info.
+
 
 Concepts
 ---------
@@ -35,7 +42,7 @@ The E-Commerce framework consists of:
 * OData based micro service for the E-Commerce APIs using the same setup as the standard SDL Web micro services
 * Generic E-Commerce framework for ECL providers
 * A number of ECL providers for retrieving categories and products (Hybris, Demandware)
-* OData based micro service 
+* OData based micro service
 
 Currently there are the following connectors implementing fully or partly the E-Commerce APIs:
 
@@ -52,7 +59,7 @@ The Fredhopper connector also provides some extensive support for inline editing
 * Facets
 * Promotions
 * Modifications
-* Rankings 
+* Rankings
 * Redirects
 * Synonyms
 
@@ -61,7 +68,7 @@ The generic DXA module that consume the E-Commerce APIs. It contains right now t
 * E-Com driven navigation items (in mega navigation). Can be mixed with content driven navigation items.
 * Widgets for:
     * Product Listers for presenting products in category and search result pages
-    * Facets 
+    * Facets
     * Breadcrumbs
     * Promotions
     * Product details
@@ -77,13 +84,13 @@ The generic DXA module that consume the E-Commerce APIs. It contains right now t
 
 In addition there is a DXA module with a set of HTML views (in JSP or Razor) implementing the default E-Commerce templates. The views are based on the DXA White Label HTML design.
 
-The ECL providers allows easy access to categories and products which makes it easy to associate references in for example the different E-Commerce widgets (listers, facets etc). 
+The ECL providers allows easy access to categories and products which makes it easy to associate references in for example the different E-Commerce widgets (listers, facets etc).
 In addition the ECL provider gives the possibility to drag & drop categories & products directly on pages as well. This allows the possibility to do both E-Commerce 1:1 (i.e. one Tridion page per category/product) and rule based (through the controllers).
 
 Prerequisites
 ----------------
 
-The framework requires DXA 1.6 which includes support for SDL Tridion 2013 SP1 and SDL Web 8.
+The framework requires DXA 1.7 which includes support for SDL Web 8/8.5.
 
 The connectors to the E-Commerce systems has been verified against the following:
 
@@ -97,20 +104,21 @@ Getting started (Java)
 
 For Java you can either have the connectors co-located or use the OData micro service. There is an example webapp for the white label design available to be able to get started quickly.
 To setup the example webapp you need to do the following:
- 
+
 1. Clone this repository: `git clone https://github.com/sdl/ecommerce-framework`
 2. Configure the dxa.properties (under ecommerce-framework-example-webapp/src/main/resources) for selected connector. Following instructions given in respective README for each connector to set it up:
     * [Fredhopper](./connectors/fredhopper-ecommerce-connector/README.md)
     * [Hybris](./connectors/hybris-ecommerce-connector/README.md)
     * [Demandware](./connectors/demandware-ecommerce-connector/README.md)   
-3. Compile the code and package a WAR file by doing the following in the root of the project: 
+3. Compile the code and package a WAR file by doing the following in the root of the project:
 
     ```
     mvn package -Pexample-webapp -P[connector #1] -P[connector #2] ...
     ```
- 
-    * Example: Compiles the webapp with the Fredhopper connector:  `mvn package -Pexample-webapp -Pfredhopper` 
-    * If using the OData micro service, use the following: `mvn package -Pexample-webapp -Podata-client`
+
+    * If using REST micro service + Fredhopper connector, use the following: `mvn package -Prest -Pfredhopper`
+    * Example: Compiles the webapp with the Fredhopper connector:  `mvn package -Pexample-webapp -Pfredhopper`
+
 4. Deploy the generated WAR to your JEE application server/servlet container. Make sure the webapp runs as the root webapp.
 5. Setup CMS as described below
 
@@ -118,16 +126,16 @@ To setup the example webapp you need to do the following:
 Getting Started (.NET)
 ------------------------
 
-The .NET version of the E-Commerce DXA modules requires the OData micro service. Follow the below steps to setup the modules: 
+The .NET version of the E-Commerce DXA modules requires the OData micro service. Follow the below steps to setup the modules:
 
 1. If you do not have a DXA.NET setup (for SDL Web 8) you can easily do this by following the instructions given here: [Installing the web application (.NET)](http://docs.sdl.com/LiveContent/content/en-US/SDL%20DXA-v6/GUID-8633F5AE-8472-4D53-AD38-A7A33DD1F5A3)
 2. Clone this repository: `git clone https://github.com/sdl/ecommerce-framework`
 3. Either open up the solution dxa.net/SDL.ECommerce.sln or add the VS projects under dxa.net to your Visual Studio solution
-4. Set the environment variable %DXA_SITE_DIR% to point to your DXA Site path (in visual studio or in your IIS instance) 
+4. Set the environment variable %DXA_SITE_DIR% to point to your DXA Site path (in visual studio or in your IIS instance)
 5. Restart Visual studio and rebuild the solution. Verify so E-Commerce Areas and DLLs are copied to your site folder
 6. Configure E-Commerce micro service in Web.config of your site:
 
-   ``` 
+   ```
     !-- E-Commerce Framework -->
     <add key="ecommerce-service-uri" value="http://localhost:8097/ecommerce.svc"/>
    ```
@@ -151,23 +159,23 @@ Follow the below steps to setup the the OData micro service (which can be run on
     * [Hybris](./connectors/hybris-ecommerce-connector/README.md)
     * [Demandware](./connectors/demandware-ecommerce-connector/README.md)  
 5. The service can be started by using the bin/start.sh or bin/start.ps1 scripts. If using Windows you can install the micro service as a Windows service by running the 'installService.ps1' script.
-    * For more information about different deployment options, see [Installing Spring Boot applications](http://docs.spring.io/spring-boot/docs/current/reference/html/deployment-install.html) 
+    * For more information about different deployment options, see [Installing Spring Boot applications](http://docs.spring.io/spring-boot/docs/current/reference/html/deployment-install.html)
 6. Verify that the service up & running by typing the following in your browser: http://[server name]:8097/ecommerce.svc/Categories. It should list all top level categories in the current E-Commerce system.
 
 
 Getting Started (CMS)
 ------------------------
 
-1. If you have not installed DXA in SDL Web CMS, you can follow the instructions given here: [Importing the DXA Publications into Content Manager](http://docs.sdl.com/LiveContent/content/en-US/SDL%20DXA-v6/GUID-EDB49D8A-DCC3-45E7-B809-6A8B377C4FEA) 
-1. Install the CMS packages by following instructions given in: [Install CMS packages](./cms/README.md) 
-2. Publish out the settings page, HTML design + the header include page. 
+1. If you have not installed DXA in SDL Web CMS, you can follow the instructions given here: [Importing the DXA Publications into Content Manager](http://docs.sdl.com/LiveContent/content/en-US/SDL%20DXA-v6/GUID-EDB49D8A-DCC3-45E7-B809-6A8B377C4FEA)
+1. Install the CMS packages by following instructions given in: [Install CMS packages](./cms/README.md)
+2. Publish out the settings page, HTML design + the header include page.
 3. Publish out pages under 'Categories' and 'Products'. And the 'Cart' and 'Search Results' pages.
 4. If needed adjust the localization properties for the selected connector (under Building Blocks/Settings/E-Commerce/Site Manager)
     * This is only needed when running the connector co-located in the DXA webapp (DXA.Java only)
 4. Start up your DXA web application and verify that the E-Commerce main categories are visible in the mega navigation
 5. In addition (optional) you can also install one of the ECL providers. See instructions given in:
     * [Hybris ECL](./ecl/hybris-ecl-provider/README.md)
-    * [Demandware ECL](./ecl/demandware-ecl-provider/README.md) 
+    * [Demandware ECL](./ecl/demandware-ecl-provider/README.md)
     * [Fredhopper ECL](./ecl/fredhopper-ecl-provider/README.md)
 
 
@@ -191,7 +199,7 @@ Branching model
 
 We intend to follow Gitflow (http://nvie.com/posts/a-successful-git-branching-model/) with the following main branches:
 
- - master - Stable 
+ - master - Stable
  - develop - Unstable
  - release/x.y - Release version x.y
 
@@ -200,7 +208,7 @@ Please submit your pull requests on develop. In the near future we intend to pus
 
 License
 ---------
-Copyright (c) 2016 SDL Group.
+Copyright (c) 2022 RWS Group.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -210,8 +218,3 @@ You may obtain a copy of the License at
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations under the License.
-
-
-
-
-

@@ -10,7 +10,6 @@ namespace SDL.ECommerce.Ecl
     /// </summary>
     public abstract class ProductItem : SelectableItem
     {
-        protected readonly IEclUri id;
         protected Category category;
         protected Product product;
 
@@ -23,9 +22,7 @@ namespace SDL.ECommerce.Ecl
         public ProductItem(int publicationId, Category category, Product product) : base(publicationId, product.Id, product.Name)
         {
             this.category = category;
-            this.product = product;
-            this.id = EclProvider.HostServices.CreateEclUri(publicationId, EclProvider.MountPointId,
-                     product.Id, DisplayTypeId, EclItemTypes.File);
+            this.product = product;          
         }
 
         public override string DisplayTypeId
@@ -35,7 +32,7 @@ namespace SDL.ECommerce.Ecl
 
         public override bool IsThumbnailAvailable
         {
-            get { return true; } // return this.product.Thumbnail != null; }
+            get { return this.product.Thumbnail != null; }
         }
 
         /// <summary>
@@ -68,6 +65,8 @@ namespace SDL.ECommerce.Ecl
             }
              */
 
+            // TODO: We can not return NULL here....
+
             return null;           
         }
 
@@ -79,11 +78,10 @@ namespace SDL.ECommerce.Ecl
         /// <returns></returns>
         public override string GetDirectLinkToPublished(IList<ITemplateAttribute> attributes)
         {
-            if ( this.product.Thumbnail != null )
-            {
-                return this.product.Thumbnail.Url;
-            }
-            return null;
+            // Return a E-Com FW specific URI to the product. This can be used to resolve to
+            // concrete site URLs to product detail pages (for example via an custom RTF processor).
+            //
+            return "ecom:product:" + this.product.Id + ":uri";
         }
 
         /// <summary>
@@ -108,14 +106,33 @@ namespace SDL.ECommerce.Ecl
         {
             get
             {
+                var category = GetMainCategory();
+                if ( category == null)
+                {
+                    return null;
+                }
+
                 // return folder uri 
                 return EclProvider.HostServices.CreateEclUri(
                     Id.PublicationId,
                     Id.MountPointId,
-                    category != null ? category.CategoryId : "0",
+                    category.CategoryId,
                     "category",
                     EclItemTypes.Folder);
             }
+        }
+
+        protected Category GetMainCategory()
+        {    
+            if (category != null)
+            {
+                return category;
+            }
+            else if (product.Categories != null && product.Categories.Count > 0)
+            {
+                return product.Categories[0];
+            }
+            return null;           
         }
 
     }

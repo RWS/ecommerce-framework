@@ -1,6 +1,4 @@
-﻿@using SDL.ECommerce.Api.Model
-@using SDL.ECommerce.DXA
-@model IImageMapPromotion
+﻿@model IImageMapPromotion
 <div class="hero">
     <div style="position: relative;">
         @Html.Partial("Partials/EditControl", Model)
@@ -9,7 +7,7 @@
     <map name="@Model.Id">
         @foreach (var contentArea in Model.ContentAreas)
         {
-            <area shape="rect" coords="@contentArea.X1,@contentArea.Y1,@contentArea.X2,@contentArea.Y2" href="@ECommerceContext.LinkResolver.GetLocationLink(contentArea.Location)">
+            <area shape="rect" coords="@contentArea.X1,@contentArea.Y1,@contentArea.X2,@contentArea.Y2" href="@LinkResolver.Instance.GetLocationLink(contentArea.Location)">
         }               
     </map>
 

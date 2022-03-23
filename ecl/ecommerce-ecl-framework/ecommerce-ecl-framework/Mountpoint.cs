@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Runtime.Caching;
 using Tridion.ExternalContentLibrary.V2;
 
 namespace SDL.ECommerce.Ecl
@@ -10,6 +13,14 @@ namespace SDL.ECommerce.Ecl
     /// </summary>
     abstract public class Mountpoint : IContentLibraryContext
     {
+
+        protected IEclSession session;
+
+        protected Mountpoint(IEclSession session)
+        {
+            this.session = session;
+        }
+
         public bool CanGetUploadMultimediaItemsUrl(int publicationId)
         {
             return true;
@@ -36,6 +47,7 @@ namespace SDL.ECommerce.Ecl
                 foreach (var product in result.Products)
                 {
                     items.Add(this.CreateProductItem(contextUri.PublicationId, null, product));
+                    AddProductToCache(product);
                 }
             }
             return EclProvider.HostServices.CreateFolderContent(contextUri, pageIndex, result.NumberOfPages, items, CanGetUploadMultimediaItemsUrl(contextUri.PublicationId), CanSearch(contextUri.PublicationId));
@@ -44,6 +56,7 @@ namespace SDL.ECommerce.Ecl
         public IList<IContentLibraryListItem> FindItem(IEclUri eclUri)
         {
             // return null so we force it to call GetItem(IEclUri)
+            //
             return null;
         }
 
@@ -75,47 +88,52 @@ namespace SDL.ECommerce.Ecl
                     }
                     else // Type_Categories
                     {
-                        /*
-                        List<string> allCategories = EclProvider.GetAllCategoryIds();
-                        foreach ( var categoryId in allCategories )
-                        {
-                            items.Add(new SelectableCategoryItem(parentFolderUri.PublicationId, categoryId));
-                        }
-                        */
-
                         // TODO: Can we somehow build up a structure here instead???
                         // TODO: Have a hook for providers to hook in their variant on the listing here???
-         
-                        var allCategories = EclProvider.GetAllCategories(parentFolderUri.PublicationId);
-                        foreach ( var category in allCategories )
+
+                        if (itemTypes.HasFlag(EclItemTypes.File))
                         {
-                            items.Add(new SelectableCategoryItem(parentFolderUri.PublicationId, category));
+                            var rootCategory = EclProvider.GetRootCategory(parentFolderUri.PublicationId);
+                            var flattenList = new CategoryFlattenPaginatedList(rootCategory, EclProvider.CategoryPageSize, EclProvider.CategoryMaxDepth);
+                            var categories = flattenList.Next(pageIndex);
+                            foreach (var category in categories)
+                            {
+                                items.Add(new SelectableCategoryItem(parentFolderUri.PublicationId, category));
+                            }
+
+                            if (categories.Count() == EclProvider.CategoryPageSize)
+                            {
+                                // As we do not know exactly how many categories there are so can't we give an exact figure on number of pages.
+                                //
+                                numberOfPages = pageIndex + 2;
+                            }
+                            else
+                            {
+                                numberOfPages = pageIndex + 1; // Reached the last page
+                            }
                         }
                     }
                 }
                 else
                 {
-                    // TODO: Always use the product catalog for retrieving the category???
-
-                    var parentCategory = EclProvider.GetCategory(parentFolderUri.ItemId, parentFolderUri.PublicationId);
-                    if (parentCategory != null)
+                    var parentCategory = new DummyCategory(parentFolderUri.ItemId);
+                    var result = EclProvider.ProductCatalog.GetCategoryAndProducts(parentFolderUri.ItemId, parentFolderUri.PublicationId, pageIndex);
+                    if (result != null)
                     {
-                        foreach (var category in parentCategory.Categories)
+                        numberOfPages = result.NumberOfPages;
+                        if (itemTypes.HasFlag(EclItemTypes.Folder))
                         {
-                            if (!String.IsNullOrEmpty(category.CategoryId))
+                            foreach (var category in result.Categories)
                             {
-                                // TODO: Have possibility to have concrete category items for each provider
                                 items.Add(new CategoryItem(parentFolderUri.PublicationId, category));
                             }
                         }
-
-                        var result = EclProvider.ProductCatalog.GetProducts(parentFolderUri.ItemId, parentFolderUri.PublicationId, pageIndex);
-                        if (result != null)
+                        if (itemTypes.HasFlag(EclItemTypes.File))
                         {
-                            numberOfPages = result.NumberOfPages;
                             foreach (var product in result.Products)
                             {
-                               items.Add(this.CreateProductItem(parentFolderUri.PublicationId, parentCategory, product));
+                                items.Add(this.CreateProductItem(parentFolderUri.PublicationId, parentCategory, product));
+                                AddProductToCache(product);
                             }
                         }
                     }
@@ -142,12 +160,33 @@ namespace SDL.ECommerce.Ecl
                 if ( eclUri.SubType.Equals("product") )
                 {
                     string productId = eclUri.ItemId;
-                    return this.CreateProductItem(eclUri.PublicationId, null, EclProvider.ProductCatalog.GetProduct(productId, eclUri.PublicationId));
+                    return this.CreateProductItem(eclUri.PublicationId, null, GetProductFromCacheOrCatalog(productId, eclUri.PublicationId));
                 }
                 else // selectable category
                 {
                     string categoryId = eclUri.ItemId;
-                    var category = EclProvider.GetCategory(categoryId, eclUri.PublicationId);
+
+                    // First try to see if it has been cached since before
+                    //
+                    var rootCategory = EclProvider.GetRootCategory(eclUri.PublicationId);
+                    Category category = null;
+                    if (rootCategory != null)
+                    {
+                        category = rootCategory.GetCachedCategory(categoryId);
+                    }
+                    if (category == null)
+                    {
+                        // Get the category from the product catalog
+                        //
+                        category = EclProvider.GetCategory(categoryId, eclUri.PublicationId);
+                    }
+                    if (category == null)
+                    {
+                        // Category could not be found. It has probably been removed from the external system, but references might still
+                        // exists in Tridion. In that case we need to be able to return a dummy category item.
+                        //
+                        category = new DummyCategory(categoryId);
+                    }
                     return new SelectableCategoryItem(eclUri.PublicationId, category);
                 }
             }
@@ -165,6 +204,11 @@ namespace SDL.ECommerce.Ecl
                     {
                         throw new Exception("Undefined category for ECL URI: " + eclUri);
                     }
+                    if (categoryId.Equals("0")) // If root category -> return the 'Products' type folder
+                    {
+                        return new TypeItem(eclUri.PublicationId, "Products");
+                    }
+
                     var category = EclProvider.GetCategory(categoryId, eclUri.PublicationId);
                     if ( category == null )
                     {
@@ -205,6 +249,21 @@ namespace SDL.ECommerce.Ecl
 
         public byte[] GetThumbnailImage(IEclUri eclUri, int maxWidth, int maxHeight)
         {
+            if ( eclUri.ItemType == EclItemTypes.File && eclUri.SubType.Equals("product") )
+            {
+                string productId = eclUri.ItemId;
+                Product product = GetProductFromCacheOrCatalog(productId, eclUri.PublicationId);
+             
+                if (product != null && product.Thumbnail != null)
+                {
+                    using (WebClient webClient = new WebClient())
+                    {
+                        Stream stream = new MemoryStream(webClient.DownloadData(product.Thumbnail.Url));
+                        stream.Position = 0;
+                        return EclProvider.HostServices.CreateThumbnailImage(maxWidth, maxHeight, stream, null);
+                    }
+                }
+            }
             return null;
         }
 
@@ -238,6 +297,66 @@ namespace SDL.ECommerce.Ecl
 
         public void Dispose()
         {
+        }
+
+        protected void AddProductToCache(Product product)
+        {
+            MemoryCache.Default.Add(GetCacheKey(product.Id), new CachedProduct { Product = product }, DateTime.Now.AddSeconds(60));
+        }
+
+        protected void AddFullDataProductToCache(Product product)
+        {
+            MemoryCache.Default.Add(GetCacheKey(product.Id), new CachedProduct { Product = product, HasFullData = true }, DateTime.Now.AddSeconds(3600));
+        }
+
+        protected Product GetProductFromCacheOrCatalog(string productId, int publicationId)
+        {
+            Product product = null; 
+            var cachedProduct = (CachedProduct) MemoryCache.Default.Get(GetCacheKey(productId));
+            if (cachedProduct != null)
+            {
+                if (cachedProduct.HasFullData)
+                {
+                    product = cachedProduct.Product;
+                }
+                else
+                {
+                    cachedProduct.Requested++;
+                    if (cachedProduct.Requested > 2)
+                    {
+                        // Cached product can be requested twice: once for the list build + get the thumbnail
+                        // This to force a full read of the product when requesting the properties view of the product (which needs the full product information).
+                        //
+                        MemoryCache.Default.Remove(GetCacheKey(productId));
+                    }
+                    else
+                    {
+                        product = cachedProduct.Product;
+                    }
+                }
+            }
+            if (product == null)
+            {
+                product = EclProvider.ProductCatalog.GetProduct(productId, publicationId);
+                if (product == null)
+                {
+                    // Product could not be found. It has probably been removed from the external system, but references might still
+                    // exists in Tridion. In that case we need to be able to return a dummy product item.
+                    //
+                    return new DummyProduct(productId);
+                }
+                else
+                {
+                    AddFullDataProductToCache(product);
+                }
+            }
+            return product;
+           
+        }
+
+        private string GetCacheKey(string productId)
+        {
+            return session.TridionUser.Id + ":" + productId;
         }
     }
 }

@@ -1,6 +1,9 @@
 package com.sdl.ecommerce.dxa.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sdl.ecommerce.api.*;
+import com.sdl.ecommerce.api.model.Category;
 import com.sdl.ecommerce.api.model.FacetParameter;
 import com.sdl.webapp.common.api.MediaHelper;
 import com.sdl.webapp.common.api.WebRequestContext;
@@ -15,7 +18,12 @@ import com.sdl.webapp.common.controller.BaseController;
 import com.sdl.webapp.common.controller.exception.NotFoundException;
 import com.sdl.webapp.common.markup.Markup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -32,7 +40,7 @@ import static com.sdl.webapp.common.controller.RequestAttributeNames.MARKUP;
  *
  * @author nic
  */
-public class AbstractECommercePageController extends BaseController {
+public abstract class AbstractECommercePageController extends BaseController {
 
     @Autowired
     protected ProductCategoryService categoryService;
@@ -91,7 +99,7 @@ public class AbstractECommercePageController extends BaseController {
         List<FacetParameter> facetParameters = new ArrayList<>();
         for ( String parameterName : requestParameters.keySet() ) {
             // TODO: Use a global facet map here instead to validate against
-            if ( !parameterName.equals("q") && !parameterName.equals("startIndex") ) {
+            if ( !parameterName.equals("q") && !parameterName.equals("startIndex") && !parameterName.equals("format") ) {
                 facetParameters.add(new FacetParameter(parameterName, requestParameters.get(parameterName)[0]));
             }
         }
@@ -160,4 +168,29 @@ public class AbstractECommercePageController extends BaseController {
         // TODO: Show some predefined promos etc here???
         return NOT_FOUND_ERROR_VIEW;
     }
+
+    /**
+     * Handles requests to a page with a requested custom format.
+     *
+     * @param request current request data object
+     * @return {@link ModelAndView} data object with information about the current view
+     */
+
+    @RequestMapping(method = RequestMethod.GET, value = "/**", params = {"format"},
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    Object handleGetPageFormatted(final HttpServletRequest request) throws ContentProviderException {
+        Object ecommerceData = this.getDataToBeFormatted(request);
+        if ( ecommerceData == null ) {
+            throw new ContentProviderException("No data found.");
+        }
+        return ecommerceData;
+    }
+
+    /**
+     * Data to be formatted. Needs to be implemented by concrete controllers.
+     * @param request
+     * @return data object
+     */
+    protected abstract Object getDataToBeFormatted(final HttpServletRequest request) throws ContentProviderException;
 }

@@ -18,6 +18,11 @@ public class TestLinkResolver implements ECommerceLinkResolver {
     }
 
     @Override
+    public String getNonContextualCategoryLink(Category category) {
+        return CategoryRef.getCategoryAbsolutePath(category);
+    }
+
+    @Override
     public String getFacetLink(Facet facet) {
         if ( facet.isCategory() ) {
             return "/" + facet.getTitle().toLowerCase().replace(" ", "_");
@@ -60,6 +65,11 @@ public class TestLinkResolver implements ECommerceLinkResolver {
             }
         }
         return link.toString();
+    }
+
+    @Override
+    public String getProductVariantDetailLink(Product product) {
+        return "/p/" + product.getId();
     }
 
     @Override

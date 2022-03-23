@@ -2,6 +2,7 @@ package com.sdl.ecommerce.odata.model;
 
 import com.sdl.ecommerce.api.model.Facet;
 import com.sdl.ecommerce.api.model.FacetGroup;
+import com.sdl.ecommerce.api.model.NameValue;
 import com.sdl.odata.api.edm.annotations.EdmComplex;
 import com.sdl.odata.api.edm.annotations.EdmProperty;
 
@@ -79,5 +80,10 @@ public class ODataFacetGroup implements FacetGroup {
     @Override
     public String getEditUrl() {
         return this.editUrl;
+    }
+
+    @Override
+    public List<NameValue> getAttributes() {
+        return null;
     }
 }

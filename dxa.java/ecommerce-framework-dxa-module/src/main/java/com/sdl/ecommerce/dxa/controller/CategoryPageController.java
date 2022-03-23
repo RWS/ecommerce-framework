@@ -5,16 +5,18 @@ import static com.sdl.ecommerce.dxa.ECommerceRequestAttributes.*;
 
 import com.sdl.ecommerce.api.model.Category;
 import com.sdl.ecommerce.api.model.FacetParameter;
+import com.sdl.ecommerce.dxa.model.SimpleQueryResult;
 import com.sdl.webapp.common.api.content.ContentProviderException;
 import com.sdl.webapp.common.api.content.PageNotFoundException;
+import com.sdl.webapp.common.api.formats.DataFormatter;
 import com.sdl.webapp.common.api.localization.Localization;
 import com.sdl.webapp.common.api.model.MvcData;
 import com.sdl.webapp.common.api.model.PageModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -38,6 +40,9 @@ public class CategoryPageController extends AbstractECommercePageController {
     private static final Logger LOG = LoggerFactory.getLogger(CategoryPageController.class);
 
     static final String STORE_TITLE = "Store"; // TODO: Fetch this from the breadcrumb info instead!!!
+
+    @Autowired
+    private DataFormatter dataFormatters;
 
     /**
      * Handle category page.
@@ -88,6 +93,28 @@ public class CategoryPageController extends AbstractECommercePageController {
         }
 
         throw new PageNotFoundException("Category page not found.");
+    }
+
+
+    @Override
+    protected Object getDataToBeFormatted(final HttpServletRequest request) throws ContentProviderException {
+
+        final String requestPath = request.getRequestURI().replaceFirst("/c", "");
+        final Category category = this.categoryService.getCategoryByPath(requestPath);
+        final List<FacetParameter> facets = this.getFacetParametersFromRequestMap(request.getParameterMap());
+        final Query query = this.queryService.newQuery();
+
+        final QueryResult result = this.queryService.query(query.
+                category(category).
+                facets(facets).
+                startIndex(this.getStartIndex(request)));
+
+        if (result != null) {
+
+            return new SimpleQueryResult(result);
+
+        }
+        return null;
     }
 
     /**

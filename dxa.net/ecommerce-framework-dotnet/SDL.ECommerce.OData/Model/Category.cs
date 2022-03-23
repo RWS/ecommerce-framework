@@ -26,6 +26,8 @@ namespace SDL.ECommerce.OData
             }
         }
 
+        public string SanitizedPathName { get; set; }
+
         internal void SetParent(ICategory parent)
         {
             this.parent = parent;

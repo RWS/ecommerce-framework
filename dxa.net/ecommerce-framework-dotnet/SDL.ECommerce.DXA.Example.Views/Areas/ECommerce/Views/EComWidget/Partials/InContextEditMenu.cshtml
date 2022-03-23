@@ -1,15 +1,56 @@
 ﻿
 @{ 
     var editMenu = ECommerceContext.EditMenu;
+    var environments = ECommerceContext.Environments;
+    var currentEnvironment = ECommerceContext.GetEnvironment();
 }
-@if (editMenu != null && editMenu.MenuItems.Count > 0)
-{
-    <div>
-        <div class="xpm-button xpm-create-new-menu">
 
-            @* TODO: Use standard Tridion fonts here *@
-            @* TODO: Visualize that there is a modification active for current page *@
+<div>
+    <div class="xpm-button xpm-create-new-menu">
 
+        @* TODO: Use standard Tridion fonts here *@
+        @* TODO: Visualize that there is a modification active for current page *@
+
+        @if (environments != null && environments.Count > 0)
+        {
+            <div class="btn-group bootstrap-select" style="width: 140px;">
+                <button type="button" style="width: auto" class="btn dropdown-toggle selectpicker btn-default" data-toggle="dropdown"
+                        title="Commerce Environment">
+                    <span class="filter-option pull-left">Commerce Environment</span>&nbsp;<span class="caret"></span>
+                </button>
+                <div class="dropdown-menu open" style="min-width: 0px; max-height: 197px; overflow: hidden; min-height: 0px;">
+                    <ul class="dropdown-menu inner selectpicker" role="menu"
+                        style="max-height: 185px; overflow-y: auto; min-height: 0px;">
+                        @{
+                            int index = 0;
+                            var requestParams = HttpUtility.ParseQueryString(Request.QueryString.ToString());
+                            requestParams.Remove(ECommerceContext.ENVIRONMENT_REQUEST_PARAM);
+                            
+                        }
+                        @foreach (var environment in environments)
+                        {
+                            var queryString = requestParams.ToString();
+                            if (!queryString.IsEmpty())
+                            {
+                                queryString += "&";
+                            }
+                            queryString += ECommerceContext.ENVIRONMENT_REQUEST_PARAM + "=" + environment;
+
+                            <li rel="@(index++)">
+                                <a tabindex="0" href="?@queryString">
+                                    <span class="text">@environment &nbsp;</span>@if (environment.Equals(currentEnvironment))
+                                    {<i style="display: inline;" class="glyphicon glyphicon-ok icon-ok check-mark"></i>}
+                                </a>
+                            </li>
+                        }
+
+                    </ul>
+                </div>
+            </div>
+        }
+
+        @if (editMenu != null && editMenu.MenuItems.Count > 0)
+        {
             <div class="btn-group bootstrap-select" style="width: 140px;">
                 <button type="button" class="btn dropdown-toggle selectpicker btn-default" data-toggle="dropdown"
                         title="@editMenu.Title">
@@ -28,6 +69,7 @@
                     </ul>
                 </div>
             </div>
-        </div> 
-    </div>
-}
+        }
+
+    </div> 
+</div>

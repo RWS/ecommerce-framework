@@ -48,7 +48,7 @@ public class DemandwareCategory implements Category {
     @Override
     public String getPathName() {
         if ( this.name != null ) {
-            return this.name.toLowerCase().replace(" ", "_").replace("&", "and");
+            return this.name.toLowerCase().replace(" ", "_").replace("&", "and").replace("'", "");
         }
         else {
             return "";

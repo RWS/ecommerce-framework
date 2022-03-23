@@ -5,7 +5,7 @@
 }
 <div @Html.DxaEntityMarkup()>
     @for (int i = 0; i < Math.Ceiling(Model.Items.Count / Convert.ToDouble(cols)); i++)
-    { 
+    {
        <div class="row row-eq-height">
            @for (int j = 0; j < cols && (cols * i + j < Model.Items.Count); j++)
            {
@@ -13,18 +13,29 @@
                 @{ 
                     var item = Model.Items[cols * i + j];
                 }
-                <a href="@ECommerceContext.LinkResolver.GetProductDetailLink(item)" class="lister-product-teaser-link">
+                <a href="@LinkResolver.Instance.GetProductDetailLink(item)" class="lister-product-teaser-link">
                     <div class="teaser">
                         <img src="@item.ThumbnailUrl" class="teaser-img loader-img" />
                         <p class="teaser-description lister-product-name">
                             @item.Name
                         </p>
-                        <h4 class="teaser-heading lister-product-price">@item.Price.FormattedPrice</h4>
+                        @if (item.Price != null)
+                        {
+                            <h4 class="teaser-heading lister-product-price">@item.Price.FormattedPrice</h4>
+                        }
                     </div>
                 </a>
             </div>
            }
        </div>
+    }
+    @if (Model.Items.Count == 0 && Model.FallbackContent != null)
+    {
+        if (Model.FallbackContent.GetType() == typeof(FallbackArticle))
+        {
+            @Html.Partial("../Entity/FallbackArticle", Model.FallbackContent)
+        }
+
     }
     @if (Model.NavigationData.ShowNavigation == true)
     {

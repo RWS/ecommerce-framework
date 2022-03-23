@@ -3,7 +3,7 @@
     <div style="position: relative;">
         @Html.Partial("Partials/EditControl", Model)
     </div>
-    <a href="@ECommerceContext.LinkResolver.GetLocationLink(Model.Location)">
+    <a href="@LinkResolver.Instance.GetLocationLink(Model.Location)">
         
         @if (Model.ImageUrl != null)
         {

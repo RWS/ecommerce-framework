@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SDL.ECommerce.Api.Model
+﻿namespace SDL.ECommerce.Api.Model
 {
     public interface IProductVariantAttributeValueType
     {
@@ -13,5 +7,7 @@ namespace SDL.ECommerce.Api.Model
         string Value { get; }
 
         bool IsSelected { get; }
+
+        bool IsAvailable { get; }
     }
 }

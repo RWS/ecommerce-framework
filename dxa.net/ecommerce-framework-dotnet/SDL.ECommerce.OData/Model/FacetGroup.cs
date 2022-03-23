@@ -1,9 +1,8 @@
 ﻿using SDL.ECommerce.Api.Model;
-using System;
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 
 namespace SDL.ECommerce.OData
 {
@@ -22,6 +21,14 @@ namespace SDL.ECommerce.OData
             get
             {
                 return (bool) this.IsCategory;
+            }
+        }
+
+        public ICollection<NameValue> Attributes
+        {
+            get
+            {
+                return null;
             }
         }
     }

@@ -1,11 +1,10 @@
 ﻿using Microsoft.OData.Client;
 using Sdl.Web.Delivery.Service;
 using SDL.ECommerce.Api.Service;
-using System;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SDL.ECommerce.OData
 {
@@ -14,22 +13,25 @@ namespace SDL.ECommerce.OData
     /// </summary>
     public class ProductDetailService : IProductDetailService
     {
-        private ODataV4Service service;
+        private ECommerceClient ecommerceClient;
 
         /// <summary>
         /// Constructor (only available internally)
         /// </summary>
         /// <param name="service"></param>
-        internal ProductDetailService(ODataV4Service service)
+        internal ProductDetailService(ECommerceClient ecommerceClient)
         {
-            this.service = service;
+            this.ecommerceClient = ecommerceClient;
         }
 
         public IProduct GetDetail(string productId)
         {
             try
             {
-                return ((SDLECommerce)this.service.Service).Products.ByKey(productId).GetValue();
+                // TODO: Could this be issue in MT sitations???
+                // System.InvalidOperationException: 'The context is already tracking a different entity with the same resource Uri.'
+                //
+                return this.ecommerceClient.ODataV4Service.Products.ByKey(productId).GetValue();
             }
             catch (DataServiceQueryException)
             {
@@ -37,7 +39,7 @@ namespace SDL.ECommerce.OData
             }
         }
 
-        public IProduct GetDetail(string productId, Dictionary<string, string> variantAttributes)
+        public IProduct GetDetail(string productId, IDictionary<string, string> variantAttributes)
         {
             ODataV4ClientFunction func = new ODataV4ClientFunction("ProductVariant");
             func.AllowCaching = false;
@@ -63,7 +65,7 @@ namespace SDL.ECommerce.OData
 
             try
             {
-                return Enumerable.FirstOrDefault<Product>(this.service.Execute<Product>(func));
+                return Enumerable.FirstOrDefault<Product>(this.ecommerceClient.ODataV4Service.Execute<Product>(func));
             }
             catch (InvalidResourceException)
             {

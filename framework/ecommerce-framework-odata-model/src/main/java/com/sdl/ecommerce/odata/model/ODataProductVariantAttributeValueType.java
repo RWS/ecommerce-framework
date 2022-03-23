@@ -21,11 +21,15 @@ public class ODataProductVariantAttributeValueType implements ProductVariantAttr
     @EdmProperty
     private boolean isSelected;
 
+    @EdmProperty
+    private boolean isApplicable;
+
     public ODataProductVariantAttributeValueType() {}
     public ODataProductVariantAttributeValueType(ProductVariantAttributeValueType valueType) {
         this.id = valueType.getId();
         this.value = valueType.getValue();
         this.isSelected = valueType.isSelected();
+        this.isApplicable = valueType.isApplicable();
     }
 
     @Override
@@ -41,5 +45,10 @@ public class ODataProductVariantAttributeValueType implements ProductVariantAttr
     @Override
     public boolean isSelected() {
         return this.isSelected;
+    }
+
+    @Override
+    public boolean isApplicable() {
+        return this.isApplicable;
     }
 }

@@ -29,7 +29,11 @@ public class FredhopperQueryService implements ProductQueryService {
 
     @Override
     public QueryResult query(Query query) throws ECommerceException {
-        QueryResult result = this.fredhopperClient.query(query, getUniverse(localizationService), getLocale(localizationService), getTriggers(localizationService));
+        QueryResult result = this.fredhopperClient.query(query,
+                getUniverse(localizationService),
+                getLocale(localizationService),
+                query.getContextData());
+                //getTriggers(localizationService));
         this.injectServices(result);
         return result;
     }

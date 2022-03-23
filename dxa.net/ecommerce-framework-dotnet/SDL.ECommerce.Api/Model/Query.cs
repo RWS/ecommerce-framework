@@ -1,9 +1,4 @@
-﻿using SDL.ECommerce.Api;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace SDL.ECommerce.Api.Model
 {
@@ -18,19 +13,26 @@ namespace SDL.ECommerce.Api.Model
         public Query(Query query)
         {
             Category = query.Category;
+            CategoryId = query.CategoryId;
+            Categories = query.Categories;
+            CategoryIds = query.CategoryIds;
             SearchPhrase = query.SearchPhrase;
             Facets = query.Facets;
             ViewSize = query.ViewSize;
             StartIndex = query.StartIndex;
+            ContextData = query.ContextData;
         }
-               
+             
         public ICategory Category { get; set; }
         public string CategoryId { get; set; }
+        public IList<ICategory> Categories { get; set; }
+        public IList<string> CategoryIds { get; set; }
         public string SearchPhrase { get; set; }
         public IList<FacetParameter> Facets { get; set; }
         public int? ViewSize { get; set; }   
         public int? StartIndex { get; set; }
         public ViewType? ViewType { get; set; }
+        public IDictionary<string,string> ContextData { get; set; }
 
         // TODO: Add view type + filter attributes here
 

@@ -6,7 +6,7 @@ import com.sdl.ecommerce.api.model.ProductVariantAttributeValueType;
 import java.util.List;
 
 /**
- * GenericProductVariantAttributeType
+ * Generic implementation of the ProductVariantAttributeType interface
  *
  * @author nic
  */
@@ -16,6 +16,12 @@ public class GenericProductVariantAttributeType implements ProductVariantAttribu
     private String name;
     private List<ProductVariantAttributeValueType> values;
 
+    /**
+     * Constructor
+     * @param id
+     * @param name
+     * @param values
+     */
     public GenericProductVariantAttributeType(String id, String name, List<ProductVariantAttributeValueType> values) {
         this.id = id;
         this.name = name;

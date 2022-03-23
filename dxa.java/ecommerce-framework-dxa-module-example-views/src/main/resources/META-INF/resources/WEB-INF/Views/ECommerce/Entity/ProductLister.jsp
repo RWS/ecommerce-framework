@@ -30,7 +30,9 @@
                 <p class="teaser-description lister-product-name">
                     ${item.name}
                 </p>
-                <h4 class="teaser-heading lister-product-price">${item.price.formattedPrice}</h4>
+                <c:if test="${item.price != null}">
+                    <h4 class="teaser-heading lister-product-price">${item.price.formattedPrice}</h4>
+                </c:if>
             </div>
         </a>
 

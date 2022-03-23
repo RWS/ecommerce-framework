@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +43,13 @@ public class DXALinkResolver implements ECommerceLinkResolver {
     }
 
     @Override
+    public String getNonContextualCategoryLink(Category category) {
+        Localization localization = this.webRequestContext.getLocalization();
+        String urlPrefix = localization.localizePath("/c"); // TODO Have the category prefix configurable
+        return urlPrefix + CategoryRef.getCategoryAbsolutePath(category);
+    }
+
+    @Override
     public String getFacetLink(Facet facet) {
         String link;
         List<FacetParameter> selectedFacets = this.getFacets(request);
@@ -70,7 +75,7 @@ public class DXALinkResolver implements ECommerceLinkResolver {
         if (facet.isCategory()) {
 
             Category category = this.categoryService.getCategoryById(facet.getValue());
-            link = this.getCategoryLink(category);
+            link = this.getNonContextualCategoryLink(category);
             link += this.getFacetLink((List<FacetParameter>) null);
 
         }
@@ -126,19 +131,26 @@ public class DXALinkResolver implements ECommerceLinkResolver {
     }
 
     @Override
+    public String getProductVariantDetailLink(Product product)
+    {
+        String productId;
+        if ( product.getVariantId() != null )
+        {
+            productId = product.getVariantId();
+        }
+        else
+        {
+            productId = product.getId();
+        }
+        return this.getProductDetailLink(productId, product.getName());
+    }
+
+    @Override
     public String getProductDetailLink(Product product) {
 
         // TODO: Add the possibility to resolve to a CMS based detail page using dynamic links
 
-        String productId;
-        if ( product.getVariantId() != null ) {
-            productId = product.getVariantId();
-        }
-        else {
-            productId = product.getId();
-        }
-
-       return this.getProductDetailLink(productId, product.getName());
+       return this.getProductDetailLink(product.getId(), product.getName());
     }
 
     @Override
@@ -146,38 +158,12 @@ public class DXALinkResolver implements ECommerceLinkResolver {
 
         String productId = product.getId();
 
-        if ( product.getVariants() != null && product.getVariants().size() > 0 ) {
 
-            Map<String, String> selectedAttributes = new HashMap<>();
-            selectedAttributes.put(variantAttributeId, variantAttributeValueId);
-            if ( product.getVariantAttributes() != null ) {
-                for (ProductVariantAttribute attribute : product.getVariantAttributes()) {
-                    if (!attribute.getId().equals(variantAttributeId)) {
-                        selectedAttributes.put(attribute.getId(), attribute.getValueId());
-                    }
-                }
-            }
+        // TODO: Add isPrimary parameter here!!
 
-            // Get matching variant based on the selected attributes
-            //
-            for (ProductVariant variant : product.getVariants()) {
-                int matchingAttributes = 0;
-                for (String selectedAttributeId : selectedAttributes.keySet()) {
-                    String selectedAttributeValueId = selectedAttributes.get(selectedAttributeId);
-                    for (ProductVariantAttribute attribute : variant.getAttributes()) {
-                        if (attribute.getId().equals(selectedAttributeId) && attribute.getValueId().equals(selectedAttributeValueId)) {
-                            matchingAttributes++;
-                            break;
-                        }
-                    }
-                }
-                if (matchingAttributes == selectedAttributes.size()) {
-                    productId = variant.getId();
-                    break;
-                }
-            }
-        }
-        else if ( product.getVariantAttributeTypes() != null && product.getVariantAttributes() != null ) {
+        // TODO: VERIFY THIS CODE -> IS IT ALIGNED WITH .NET VERSION????
+
+        if ( product.getVariantLinkType() == VariantLinkType.VARIANT_ATTRIBUTES && product.getVariantAttributeTypes() != null && product.getVariantAttributes() != null ) {
 
             Map<String, String> selectedAttributes = new HashMap<>();
             selectedAttributes.put(variantAttributeId, variantAttributeValueId);
@@ -207,6 +193,41 @@ public class DXALinkResolver implements ECommerceLinkResolver {
             }
             return link;
         }
+        else if ( product.getVariantLinkType() == VariantLinkType.VARIANT_ID && product.getVariants() != null && product.getVariants().size() > 0 ) {
+
+            Map<String, String> selectedAttributes = new HashMap<>();
+            selectedAttributes.put(variantAttributeId, variantAttributeValueId);
+            if ( product.getVariantAttributes() != null ) {
+                for (ProductAttribute attribute : product.getVariantAttributes()) {
+                    if (!attribute.getId().equals(variantAttributeId)) {
+                        if ( attribute.getValues() != null && !attribute.getValues().isEmpty() ) {
+                            selectedAttributes.put(attribute.getId(), attribute.getValues().get(0).getValue());
+                        }
+                    }
+                }
+            }
+
+            // Get matching variant based on the selected attributes
+            //
+            for (ProductVariant variant : product.getVariants()) {
+                int matchingAttributes = 0;
+                for (String selectedAttributeId : selectedAttributes.keySet()) {
+                    String selectedAttributeValueId = selectedAttributes.get(selectedAttributeId);
+                    for (ProductAttribute attribute : variant.getAttributes()) {
+                        if ( attribute.getValues() != null && !attribute.getValues().isEmpty() ) {
+                            if (attribute.getId().equals(selectedAttributeId) && attribute.getValues().get(0).getValue().equals(selectedAttributeValueId)) {
+                                matchingAttributes++;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (matchingAttributes == selectedAttributes.size()) {
+                    productId = variant.getId();
+                    break;
+                }
+            }
+        }
 
 
         return this.getProductDetailLink(productId, product.getName());
@@ -228,6 +249,8 @@ public class DXALinkResolver implements ECommerceLinkResolver {
                     replace("/", "-").
                     replace("®", "").
                     replace("&", "").
+                    replace(".", "").
+                    replace("+", "-").
                     replace("\"", "");
             return  webRequestContext.getLocalization().localizePath("/p/") + seoName + "/" + productId;
         }
@@ -244,6 +267,9 @@ public class DXALinkResolver implements ECommerceLinkResolver {
         StringBuilder sb = new StringBuilder();
         boolean firstParam = true;
         for ( FacetParameter facet : selectedFacets ) {
+            if ( facet.isHidden() ) {
+                continue;
+            }
             if ( firstParam ) {
                 sb.append("?");
                 firstParam = false;
@@ -263,6 +289,9 @@ public class DXALinkResolver implements ECommerceLinkResolver {
         boolean foundFacet = false;
         if ( selectedFacets != null ) {
             for (FacetParameter facetParam : selectedFacets) {
+                if ( facetParam.isHidden() ) {
+                    continue;
+                }
                 if (firstParam) {
                     sb.append("?");
                     firstParam = false;
@@ -295,6 +324,9 @@ public class DXALinkResolver implements ECommerceLinkResolver {
         boolean firstParam = true;
         if ( selectedFacets != null ) {
             for (FacetParameter facetParam : selectedFacets) {
+                if ( facetParam.isHidden() ) {
+                    continue;
+                }
                 if (firstParam) {
                     sb.append("?");
                     firstParam = false;

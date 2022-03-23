@@ -39,4 +39,10 @@ public interface FacetGroup extends Editable {
      * @return is category
      */
     boolean isCategory();
+
+    /**
+     * Get associated attributes to control presentation of facets etc.
+     * @return attributes
+     */
+    List<NameValue> getAttributes();
 }

@@ -6,6 +6,10 @@ namespace SDL.Fredhopper.Ecl
     class FredhopperMountpoint : Mountpoint
     {
 
+        public FredhopperMountpoint(IEclSession session) : base(session)
+        {
+        }
+
         public override bool CanSearch(int publicationId)
         {
             return true;

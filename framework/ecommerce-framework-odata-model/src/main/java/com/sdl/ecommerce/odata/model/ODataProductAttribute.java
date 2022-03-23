@@ -1,10 +1,13 @@
 package com.sdl.ecommerce.odata.model;
 
+import com.sdl.ecommerce.api.model.ProductAttribute;
+import com.sdl.ecommerce.api.model.ProductAttributeValue;
 import com.sdl.odata.api.edm.annotations.EdmComplex;
 import com.sdl.odata.api.edm.annotations.EdmProperty;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * OData Product Attribute
@@ -12,38 +15,48 @@ import java.util.List;
  * @author nic
  */
 @EdmComplex(name="ProductAttribute", namespace = "SDL.ECommerce")
-public class ODataProductAttribute {
+public class ODataProductAttribute implements ProductAttribute {
+
+    @EdmProperty
+    private String id;
 
     @EdmProperty
     private String name;
 
     @EdmProperty
-    private String singleValue;
+    private boolean isSingleValue;
 
     @EdmProperty
-    private List<String> multiValue = new ArrayList<>();
+    private List<ODataProductAttributeValue> values = new ArrayList<>();
 
     public ODataProductAttribute() {}
+    public ODataProductAttribute(ProductAttribute productAttribute) {
+        this.id = productAttribute.getId();
+        this.name = productAttribute.getName();
+        this.isSingleValue = productAttribute.isSingleValue();
+        if ( productAttribute.getValues() != null ) {
+            productAttribute.getValues().forEach(value -> this.values.add(new ODataProductAttributeValue(value)));
+        }
 
-    public ODataProductAttribute(String name, Object value) {
-        this.name = name;
-        if ( value instanceof List ) {
-            this.multiValue.addAll((List<String>) value);
-        }
-        else {
-            this.singleValue = value.toString();
-        }
     }
 
+    @Override
+    public String getId() {
+        return null;
+    }
+
+    @Override
     public String getName() {
-        return name;
+        return null;
     }
 
-    public List<String> getMultiValue() {
-        return multiValue;
+    @Override
+    public boolean isSingleValue() {
+        return false;
     }
 
-    public String getSingleValue() {
-        return singleValue;
+    @Override
+    public List<ProductAttributeValue> getValues() {
+        return this.values.stream().collect(Collectors.toList());
     }
 }

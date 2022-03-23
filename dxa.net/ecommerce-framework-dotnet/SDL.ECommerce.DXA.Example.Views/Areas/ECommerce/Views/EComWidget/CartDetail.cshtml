@@ -24,13 +24,13 @@
                         <div class="list-group-item">
                             <div class="row">
                                 <div class="col-md-1" style="text-align: center;">
-                                    <a href="#" class="remove-from-cart" data-product-id="@item.Product.Id"><i class="fa fa-minus-square"></i></a>
+                                    <a href="#" class="remove-from-cart" data-localization-prefix="@ECommerceContext.LocalizePath("/")" data-product-id="@item.Product.Id"><i class="fa fa-minus-square"></i></a>
                                 </div>
                                 <div class="col-md-2">
                                     <img src="@item.Product.ThumbnailUrl" height="100" />
                                 </div>
                                 <div class="col-md-5">
-                                    <a href="@ECommerceContext.LinkResolver.GetProductDetailLink(item.Product)"><strong>@item.Product.Name</strong></a>
+                                    <a href="@LinkResolver.Instance.GetProductVariantDetailLink(item.Product)"><strong>@item.Product.Name</strong></a>
                                 </div>
                                 <div class="col-md-2">
                                     @item.Quantity

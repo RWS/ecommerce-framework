@@ -1,12 +1,10 @@
-﻿@using SDL.ECommerce.Api.Model
-@using SDL.ECommerce.DXA
-@model IContentPromotion
+﻿@model IContentPromotion
 
 <div>
      <div style="position: relative;">
          @Html.Partial("Partials/EditControl", Model)
      </div>
-     <a href="@ECommerceContext.LinkResolver.GetLocationLink(Model.Location)">      
+     <a href="@LinkResolver.Instance.GetLocationLink(Model.Location)">      
         @if ( !String.IsNullOrEmpty(Model.ImageUrl))
         {
             <div class="hero">

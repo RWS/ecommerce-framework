@@ -1,7 +1,6 @@
 ﻿using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using SDL.DXA.Modules.Navigation.Models;
-using System.Web.Mvc;
 
 namespace SDL.DXA.Modules.Navigation
 {

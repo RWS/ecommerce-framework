@@ -1,15 +1,19 @@
 ﻿@model SearchFeedbackWidget
 <div @Html.DxaEntityMarkup()>
 
-    @if (Model.QuerySuggestions != null && Model.QuerySuggestions.Count > 0)
-    {
+    @if (Model.QuerySuggestions != null && Model.QuerySuggestions.Count > 1)
+    {        
         <div class="panel panel-default" style="padding: 16px;">
             <div @Html.DxaPropertyMarkup(() => Model.SpellCheckLabel)>
                @Model.SpellCheckLabel
             </div>
             <div style="margin-left: 16px;">
-                @* Right now is only the first query suggestion presented *@
-                <i>@Model.QuerySuggestions[0].Original -> @Model.QuerySuggestions[0].Suggestion</i>
+                <i>@Model.QuerySuggestions[0].Original -> 
+                @foreach (var suggestion in Model.QuerySuggestions)
+                {
+                    <span style="margin-right: 8px;"><a href="@ECommerceContext.LocalizePath("/search")/@Uri.EscapeDataString(suggestion.Suggestion)" style="text-decoration: underline;">@suggestion.Suggestion @(suggestion.EstimatedResults != null ? "(" + suggestion.EstimatedResults + ")" : "")</a></span>
+                }             
+                </i>
             </div>
         </div>
     }

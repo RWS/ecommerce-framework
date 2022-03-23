@@ -65,7 +65,6 @@ function Initialize-ImportExport($importExportFolder, $tempFolder)
 
     Write-Verbose "Initializing Import/Export using folder '$importExportFolder'"
 
-    Add-Type -Path "$importExportFolder\ChilkatDotNet4.dll"
     Add-Type -Path "$importExportFolder\Tridion.Common.dll"
     Add-Type -Path "$importExportFolder\Tridion.ContentManager.ImportExport.Common.dll"
     Add-Type -Path "$importExportFolder\Tridion.ContentManager.ImportExport.Client.dll"
@@ -120,7 +119,7 @@ function Get-ImportExportServiceClient {
             if ($cmsUrl.StartsWith("https")) { $binding.Security.Mode = "Transport" }
             else { $binding.Security.Mode = "TransportCredentialOnly" }
 			$binding.Security.Transport.ClientCredentialType = $cmsAuth
-			$endpoint = New-Object System.ServiceModel.EndpointAddress ($cmsUrl + "webservices/ImportExportService2013.svc/basicHttp")
+			$endpoint = New-Object System.ServiceModel.EndpointAddress ($cmsUrl + "webservices/ImportExportService201501.svc/basicHttp")
 			$client = New-Object Tridion.ContentManager.ImportExport.Client.ImportExportServiceClient $binding,$endpoint
 		}
  
@@ -130,7 +129,7 @@ function Get-ImportExportServiceClient {
 			$binding.Security.Transport.ClientCredentialType = $cmsAuth
 			$binding.TransferMode = "StreamedResponse"
 			$binding.MessageEncoding = "Mtom"
-			$endpoint = New-Object System.ServiceModel.EndpointAddress ($cmsUrl + "webservices/ImportExportService2013.svc/streamDownload_basicHttp")	
+			$endpoint = New-Object System.ServiceModel.EndpointAddress ($cmsUrl + "webservices/ImportExportService201501.svc/streamDownload_basicHttp")	
 			$client = New-Object Tridion.ContentManager.ImportExport.Client.ImportExportStreamDownloadClient $binding,$endpoint
 		}
  
@@ -139,7 +138,7 @@ function Get-ImportExportServiceClient {
             else { $binding.Security.Mode = "None" }
 			$binding.TransferMode = "StreamedRequest"
 			$binding.MessageEncoding = "Mtom"
-			$endpoint = New-Object System.ServiceModel.EndpointAddress ($cmsUrl + "webservices/ImportExportService2013.svc/streamUpload_basicHttp")
+			$endpoint = New-Object System.ServiceModel.EndpointAddress ($cmsUrl + "webservices/ImportExportService201501.svc/streamUpload_basicHttp")
 			$client = New-Object Tridion.ContentManager.ImportExport.Client.ImportExportStreamUploadClient $binding,$endpoint
 		}
 	}
@@ -158,7 +157,7 @@ function Get-CoreServiceClient {
     )        
     Write-Verbose "Getting Core Service Client with type '$type' for CMS URL '$cmsUrl' ..."
 
-	$binding = New-Object System.ServiceModel.WSHttpBinding
+	$binding = New-Object System.ServiceModel.BasicHttpBinding
 	$binding.MaxBufferPoolSize = [int]::MaxValue
 	$binding.MaxReceivedMessageSize = [int]::MaxValue
 	$binding.ReaderQuotas.MaxArrayLength = [int]::MaxValue
@@ -169,12 +168,11 @@ function Get-CoreServiceClient {
 	switch($type)
 	{
 		"Service" {
-            if ($cmsUrl.StartsWith("https")) { $binding.Security.Mode = "TransportWithMessageCredential" }
-            else { $binding.Security.Mode = "Message" }
-            if ($cmsAuth -eq "Basic") { $binding.Security.Message.ClientCredentialType = "UserName" }
-            else { $binding.Security.Message.ClientCredentialType = $cmsAuth }
-			$endpoint = New-Object System.ServiceModel.EndpointAddress ($cmsUrl + "webservices/CoreService2013.svc/wsHttp")
-			$client = New-Object Tridion.ContentManager.CoreService.Client.SessionAwareCoreServiceClient $binding,$endpoint
+            if ($cmsUrl.StartsWith("https")) { $binding.Security.Mode = "Transport" }
+            else { $binding.Security.Mode = "TransportCredentialOnly" }
+			$binding.Security.Transport.ClientCredentialType = $cmsAuth
+			$endpoint = New-Object System.ServiceModel.EndpointAddress ($cmsUrl + "webservices/CoreService201501.svc/basicHttp")
+			$client = New-Object Tridion.ContentManager.CoreService.Client.CoreServiceClient $binding,$endpoint
         }
 	}
 

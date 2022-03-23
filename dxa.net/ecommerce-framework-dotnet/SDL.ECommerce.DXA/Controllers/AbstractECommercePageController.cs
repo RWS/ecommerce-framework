@@ -1,18 +1,20 @@
 ﻿using Sdl.Web.Common;
-using Sdl.Web.Common.Configuration;
-using Sdl.Web.Common.Interfaces;
 using Sdl.Web.Common.Logging;
 using Sdl.Web.Common.Models;
 using Sdl.Web.Mvc.Configuration;
 using Sdl.Web.Mvc.Controllers;
 using Sdl.Web.Mvc.Formats;
+
 using SDL.ECommerce.Api;
 using SDL.ECommerce.Api.Model;
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+
+using SDL.ECommerce.DXA.Factories;
+using SDL.ECommerce.DXA.Servants;
 
 namespace SDL.ECommerce.DXA.Controllers
 {
@@ -21,6 +23,12 @@ namespace SDL.ECommerce.DXA.Controllers
     /// </summary>
     public abstract class AbstractECommercePageController : BaseController
     {
+        protected IPageModelServant PageModelServant;
+
+        protected AbstractECommercePageController()
+        {
+            PageModelServant = DependencyFactory.Current.Resolve<IPageModelServant>();
+        }
 
         /// <summary>
         /// Resolve Template Page
@@ -98,8 +106,9 @@ namespace SDL.ECommerce.DXA.Controllers
         protected ActionResult View(PageModel templatePage)
         {
             SetupViewData(templatePage);
+            ViewModel model = EnrichModel(templatePage) ?? templatePage;
             ControllerContext.RouteData.Values["controller"] = "Page";
-            return View(templatePage.MvcData.ViewName, templatePage);
+            return View(model.MvcData.ViewName, model);
         }
 
         protected int GetStartIndex()
@@ -122,23 +131,9 @@ namespace SDL.ECommerce.DXA.Controllers
         {
             using (new Tracer())
             {
-                // TODO: Have the possiblity to have a E-Commerce specific 404 page for categories and products
-                //
-                string notFoundPageUrl = ECommerceContext.LocalizePath("/error-404");
-
-                PageModel pageModel;
-                try
-                {
-                    pageModel = ContentProvider.GetPageModel(notFoundPageUrl, WebRequestContext.Localization);
-                }
-                catch (DxaItemNotFoundException ex)
-                {
-                    Log.Error(ex);
-                    throw new HttpException(404, ex.Message);
-                }
-
+                PageModel pageModel = PageModelServant.GetNotFoundPageModel(ContentProvider);
+                WebRequestContext.PageModel = pageModel;
                 SetupViewData(pageModel);
-                ViewModel model = EnrichModel(pageModel) ?? pageModel;
                 Response.StatusCode = 404;
                 return View(pageModel);
             }

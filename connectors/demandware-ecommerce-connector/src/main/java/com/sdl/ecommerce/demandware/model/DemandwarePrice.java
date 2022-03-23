@@ -37,9 +37,18 @@ public class DemandwarePrice implements ProductPrice {
 
         // TODO: Improve this implementation so so dot gets in the correct format for various countries etc
         //
-        Currency currency = Currency.getInstance(this.currency);
-        //DecimalFormat format = new DecimalFormat(currency.getSymbol() + "###.##");
-        //return format.format(this.price);
-        return String.format("%s%.2f", currency.getSymbol(), this.price);
+        try {
+            Currency currency = Currency.getInstance(this.currency);
+
+            //DecimalFormat format = new DecimalFormat(currency.getSymbol() + "###.##");
+            //return format.format(this.price);
+            return String.format("%s%.2f", currency.getSymbol(), this.price);
+        }
+        catch ( Exception e ) {
+            // In case the currency could not be find -> skip the currency in the formatted price
+            //
+            return  String.format("%.2f", this.price);
+        }
     }
+
 }

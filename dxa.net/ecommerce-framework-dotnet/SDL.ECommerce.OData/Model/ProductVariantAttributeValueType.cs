@@ -1,9 +1,4 @@
 ﻿using SDL.ECommerce.Api.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SDL.ECommerce.OData
 {
@@ -16,5 +11,14 @@ namespace SDL.ECommerce.OData
                 return (bool) this.IsSelected;
             }
         }
+
+        bool IProductVariantAttributeValueType.IsAvailable
+        {
+            get
+            {
+                return (bool)this.IsApplicable;
+            }
+        }
+
     }
 } 

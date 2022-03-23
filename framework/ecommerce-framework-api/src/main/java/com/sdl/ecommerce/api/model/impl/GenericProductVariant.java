@@ -1,8 +1,8 @@
 package com.sdl.ecommerce.api.model.impl;
 
+import com.sdl.ecommerce.api.model.ProductAttribute;
 import com.sdl.ecommerce.api.model.ProductPrice;
 import com.sdl.ecommerce.api.model.ProductVariant;
-import com.sdl.ecommerce.api.model.ProductVariantAttribute;
 
 import java.util.List;
 
@@ -15,9 +15,9 @@ public class GenericProductVariant implements ProductVariant {
 
     private String id;
     private ProductPrice price;
-    private List<ProductVariantAttribute> attributes;
+    private List<ProductAttribute> attributes;
 
-    public GenericProductVariant(String id, ProductPrice price, List<ProductVariantAttribute> attributes) {
+    public GenericProductVariant(String id, ProductPrice price, List<ProductAttribute> attributes) {
         this.id = id;
         this.price = price;
         this.attributes = attributes;
@@ -34,7 +34,18 @@ public class GenericProductVariant implements ProductVariant {
     }
 
     @Override
-    public List<ProductVariantAttribute> getAttributes() {
+    public List<ProductAttribute> getAttributes() {
         return this.attributes;
+    }
+
+    public ProductAttribute getAttribute(String id) {
+        if ( this.attributes != null ) {
+            for ( ProductAttribute attribute : this.attributes ) {
+                if ( attribute.getId().equals(id) ) {
+                    return attribute;
+                }
+            }
+        }
+        return null;
     }
 }

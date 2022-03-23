@@ -22,5 +22,5 @@ public interface ProductVariant {
     /**
      * @return variant attributes
      */
-    List<ProductVariantAttribute> getAttributes();
+    List<ProductAttribute> getAttributes();
 }

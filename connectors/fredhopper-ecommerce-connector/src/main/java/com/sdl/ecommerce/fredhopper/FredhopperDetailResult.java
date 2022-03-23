@@ -4,15 +4,10 @@ import com.fredhopper.webservice.client.*;
 import com.sdl.ecommerce.api.ProductDetailResult;
 import com.sdl.ecommerce.api.model.*;
 import com.sdl.ecommerce.api.model.impl.GenericBreadcrumb;
-import com.sdl.ecommerce.api.model.impl.GenericProductVariantAttribute;
-import com.sdl.ecommerce.api.model.impl.GenericProductVariantAttributeType;
-import com.sdl.ecommerce.api.model.impl.GenericProductVariantAttributeValueType;
-import com.sdl.ecommerce.fredhopper.model.FredhopperBreadcrumb;
 import com.sdl.ecommerce.fredhopper.model.FredhopperProduct;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Fredhopper Detail Result
@@ -22,9 +17,11 @@ import java.util.Map;
 public class FredhopperDetailResult extends FredhopperResultBase implements ProductDetailResult {
 
     private Product productDetail = null;
+    private ProductVariantBuilder productVariantBuilder = null;
 
-    public FredhopperDetailResult(Page fredhopperPage, FredhopperLinkManager linkManager) {
+    public FredhopperDetailResult(Page fredhopperPage, FredhopperLinkManager linkManager, ProductVariantBuilder productVariantBuilder) {
         super(fredhopperPage, linkManager);
+        this.productVariantBuilder = productVariantBuilder;
     }
 
     @Override
@@ -51,21 +48,24 @@ public class FredhopperDetailResult extends FredhopperResultBase implements Prod
     }
 
     private Product getProductDetail(Universe universe) {
-        if ( universe.getItemsSection() != null && universe.getItemsSection().getItems() != null ) {
+        if ( universe != null && universe.getItemsSection() != null && universe.getItemsSection().getItems() != null ) {
             List<Product> products = this.getProducts(universe.getItemsSection().getItems().getItem());
             if (products.size() > 0) {
                 FredhopperProduct product = (FredhopperProduct) products.get(0);
                 // TODO: categoryId should also be an model attribute, right?
-                List<String> categoryIds = (List<String>) product.getAttribute("categoryId");
+
+                List<ProductAttributeValue> categoryIds = product.getAttributeValues("categories");
                 if (categoryIds != null) {
-                    for (String categoryId : categoryIds) {
-                        Category category = this.categoryService.getCategoryById(categoryId);
+                    for (ProductAttributeValue categoryId : categoryIds) {
+                        Category category = this.categoryService.getCategoryById(categoryId.getValue());
                         if (category != null) {
                             product.getCategories().add(category);
                         }
                     }
                 }
-                this.setVariantInfo(product, universe);
+                if ( this.productVariantBuilder != null ) {
+                    this.productVariantBuilder.buildVariants(product, universe);
+                }
                 return product;
             }
         }
@@ -83,43 +83,6 @@ public class FredhopperDetailResult extends FredhopperResultBase implements Prod
             }
         }
         return breadcrumbs;
-    }
-
-    private void setVariantInfo(FredhopperProduct product, Universe universe) {
-
-        // Get variant attribute types
-        //
-        List<ProductVariantAttributeType> attributeTypes = new ArrayList<>();
-        List<Filter> filters = this.getFacetFilters(universe);
-        for ( Filter filter : filters ) {
-            // TODO: Have the variant prefixes configurable
-            if ( filter.getOn().startsWith("variant_") ) {
-                List<ProductVariantAttributeValueType> values = new ArrayList<>();
-                for (Filtersection section : filter.getFiltersection()) {
-                   values.add(new GenericProductVariantAttributeValueType(section.getValue().getValue(), section.getLink().getName(), section.isSelected() != null ? section.isSelected() : false));
-                }
-                attributeTypes.add(new GenericProductVariantAttributeType(filter.getOn(), filter.getTitle(), values));
-            }
-        }
-        if ( attributeTypes.isEmpty() ) {
-            // Current product has no variants
-            //
-            return;
-        }
-        product.setVariantAttributeTypes(attributeTypes);
-
-        // Get current variant values
-        //
-        List<ProductVariantAttribute> variantAttributes = new ArrayList<>();
-        for ( ProductVariantAttributeType attributeType : attributeTypes ) {
-            Attribute attributeValue = product.getFredhopperAttribute(attributeType.getId());
-            if ( !attributeValue.getValue().isEmpty() ) {
-                Value value = attributeValue.getValue().get(0);
-                variantAttributes.add(new GenericProductVariantAttribute(attributeType.getId(), attributeType.getName(), value.getNonMl(), value.getValue()));
-            }
-        }
-        product.setVariantAttributes(variantAttributes);
-
     }
 
 }

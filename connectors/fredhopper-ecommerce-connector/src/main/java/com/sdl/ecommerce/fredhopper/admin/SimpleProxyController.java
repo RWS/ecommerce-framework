@@ -54,6 +54,7 @@ public class SimpleProxyController {
                 Credentials credentials = new UsernamePasswordCredentials(this.accessUsername, this.accessPassword);
                 client.getState().setCredentials(AuthScope.ANY, credentials);
             }
+            this.isInitialized = true;
         }
     }
 
