@@ -61,7 +61,7 @@
         <jersey-version>1.18</jersey-version>
 
         <!-- Jackson and related libraries -->
-        <jackson-version>2.4.3</jackson-version>
+        <jackson-version>2.13.2</jackson-version>
         <!-- TODO: Update to later version of Jackson to avoid vulnability issues
         <jackson-version>2.8.11.1</jackson-version>
         -->
